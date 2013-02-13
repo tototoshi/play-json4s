@@ -67,7 +67,7 @@ object Json4sPlayModuleBuild extends Build {
       ),
       resolvers += typesafeRepo
     )
-  ).dependsOn(core, test)
+  ).dependsOn(core, test % "test->test")
 
   lazy val jackson = Project(
     id = "json4s-jackson-play-module",
@@ -83,7 +83,7 @@ object Json4sPlayModuleBuild extends Build {
       ),
       resolvers += typesafeRepo
     )
-  ).dependsOn(core, test)
+  ).dependsOn(core, test % "test->test")
 
   lazy val json4sPlayModule = Project(
     id = "json4s-play-module",
@@ -94,7 +94,10 @@ object Json4sPlayModuleBuild extends Build {
       version := _version,
       scalaVersion := _scalaVersion,
       scalacOptions ++= Seq("-feature"),
-      resolvers += typesafeRepo
+      resolvers += typesafeRepo,
+      publishArtifact := false,
+      publish := {},
+      publishLocal := {}
     )
-  ).aggregate(native, jackson)
+  ).aggregate(native, jackson, core, test)
 }
