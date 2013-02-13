@@ -22,7 +22,7 @@ import play.api.test._
 
 object Implicits {
 
-  implicit class Json4sJacksonFakeRequest[A](fakeRequest: FakeRequest[A]) {
+  implicit class Json4sFakeRequest[A](fakeRequest: FakeRequest[A]) {
     def withJson4sBody(jval: JValue): Request[JValue] = fakeRequest.withBody(body = jval)
   }
 
