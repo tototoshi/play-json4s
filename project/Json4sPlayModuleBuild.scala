@@ -67,7 +67,7 @@ object Json4sPlayModuleBuild extends Build {
       ),
       resolvers += typesafeRepo
     )
-  ).dependsOn(core, test % "test->test")
+  ).dependsOn(core, test % "test")
 
   lazy val jackson = Project(
     id = "json4s-jackson-play-module",
@@ -83,7 +83,7 @@ object Json4sPlayModuleBuild extends Build {
       ),
       resolvers += typesafeRepo
     )
-  ).dependsOn(core, test % "test->test")
+  ).dependsOn(core, test % "test")
 
   lazy val json4sPlayModule = Project(
     id = "json4s-play-module",
