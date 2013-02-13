@@ -25,6 +25,7 @@ import play.api.test.Helpers._
 
 import org.json4s._
 import org.json4s.native.JsonMethods._
+import com.github.tototoshi.play2.json4s.test.Implicits._
 
 case class Person(id: Long, name: String, age: Int)
 
@@ -61,7 +62,7 @@ class PlayModuleSpec extends Specification with Json4s {
 
     "accept native json request" in {
       val header = FakeHeaders(Seq(("Content-Type" -> Seq("application/json"))))
-      val res = TestApplication.post(FakeRequest("POST", "", header, parse(testJson)))
+      val res = TestApplication.post(FakeRequest().withJson4sBody(parse(testJson)))
       contentAsString(res) must beEqualTo ("ぱみゅぱみゅ")
     }
 

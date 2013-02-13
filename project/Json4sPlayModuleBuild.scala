@@ -11,10 +11,10 @@ object Json4sPlayModuleBuild extends Build {
   val json4sNative = "org.json4s" %% "json4s-native" % _json4sVersion
   val json4sJackson = "org.json4s" %% "json4s-jackson" % _json4sVersion
 
-  val playDependencies = Seq(
-    "play" %% "play" % "2.1.0" % "provided",
-    "play" %% "play-test" % "2.1.0" % "test"
-  )
+  val playApi = "play" %% "play" % "2.1.0"
+  val playTest = "play" %% "play-test" % "2.1.0"
+
+  val playDependencies = Seq(playApi % "provided", playTest % "test")
 
   val typesafeRepo = "typesafe" at "http://repo.typesafe.com/typesafe/releases"
 
@@ -35,6 +35,24 @@ object Json4sPlayModuleBuild extends Build {
     )
   )
 
+  lazy val test = Project(
+    id = "json4s-test-play-module",
+    base = file("test"),
+    settings = Project.defaultSettings ++ Seq(
+      name := "json4s-test-play-module",
+      organization := "com.github.tototoshi",
+      version := _version,
+      scalaVersion := _scalaVersion,
+      scalacOptions ++= Seq("-feature"),
+      libraryDependencies ++= Seq(
+        playApi % "provided",
+        playTest % "provided",
+        json4sCore
+      ),
+      resolvers += typesafeRepo
+    )
+  )
+
   lazy val native = Project(
     id = "json4s-native-play-module",
     base = file("native"),
@@ -49,7 +67,7 @@ object Json4sPlayModuleBuild extends Build {
       ),
       resolvers += typesafeRepo
     )
-  ).dependsOn(core)
+  ).dependsOn(core, test)
 
   lazy val jackson = Project(
     id = "json4s-jackson-play-module",
@@ -65,7 +83,7 @@ object Json4sPlayModuleBuild extends Build {
       ),
       resolvers += typesafeRepo
     )
-  ).dependsOn(core)
+  ).dependsOn(core, test)
 
   lazy val json4sPlayModule = Project(
     id = "json4s-play-module",
