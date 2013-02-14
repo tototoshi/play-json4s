@@ -6,6 +6,8 @@ This module allows you to use json4s in your play20 application.
 
 ## Usage
 
+### With controllers
+
 To use json4s-native
 ```scala
 import com.github.tototoshi.play2.json4s.native._
@@ -46,6 +48,8 @@ object Application extends Controller with Json4s {
 }
 ```
 
+### With tests
+
 This module also provides test helpers for Json4s.
 
 To use test helpers for json4s-native
@@ -77,7 +81,7 @@ class ApplicationSpec extends Specification {
   "Json4sPlayModule" should {
 
     "allow you to use json4s-native value as response" in {
-      val res = Application.get(FakeRequest("GET", ""))
+      val res = Application.get(FakeRequest())
       contentType(res) must beSome("application/json")
       contentAsJson4s(res) must_== (JObject(List(("id",JInt(1)), ("name",JString("ぱみゅぱみゅ")), ("age",JInt(20)))))
     }
