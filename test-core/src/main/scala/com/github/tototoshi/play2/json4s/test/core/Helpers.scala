@@ -38,9 +38,3 @@ trait Helpers[T] { self: MethodsImport[T] =>
 
 }
 
-trait NativeHelpers extends Helpers[scala.text.Document] with MethodsImport[scala.text.Document]
-
-
-trait JacksonHelpers extends Helpers[JValue] with MethodsImport[JValue]
-
-

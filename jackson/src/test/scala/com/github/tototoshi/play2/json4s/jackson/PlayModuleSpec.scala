@@ -44,7 +44,7 @@ object TestApplication extends Controller with Json4s {
 }
 
 
-class Json4sPlayModuleSpec extends Specification with Json4s {
+class Json4sPlayModuleSpec extends Specification {
 
   "Json4sPlayModule" should {
 
