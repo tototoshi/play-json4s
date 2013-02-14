@@ -17,7 +17,12 @@ package com.github.tototoshi.play2.json4s.test.jackson
 
 import org.json4s.JValue
 import com.github.tototoshi.play2.json4s.core._
-import com.github.tototoshi.play2.json4s.test.core._
+import com.github.tototoshi.play2.json4s.test.core.{ Helpers => CoreHelpers }
 
-trait JacksonHelpers extends Helpers[JValue] with MethodsImport[JValue]
+trait Helpers extends CoreHelpers[JValue] with MethodsImport[JValue]
+
+object Helpers extends Helpers {
+  val methods = org.json4s.jackson.JsonMethods
+}
+
 

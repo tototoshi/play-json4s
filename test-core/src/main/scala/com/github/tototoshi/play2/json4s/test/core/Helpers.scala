@@ -30,7 +30,10 @@ trait Helpers[T] { self: MethodsImport[T] =>
   def contentAsJson4s(of: Content): JValue = parse(of.body)
 
   implicit class Json4sFakeRequest[A](fakeRequest: FakeRequest[A]) {
-    def withJson4sBody(jval: JValue): Request[JValue] = fakeRequest.withBody(body = jval)
+    def withJson4sBody(jval: JValue): Request[JValue] =
+      fakeRequest
+        .withHeaders("Content-Type" -> "application/json")
+        .withBody(body = jval)
   }
 
 }

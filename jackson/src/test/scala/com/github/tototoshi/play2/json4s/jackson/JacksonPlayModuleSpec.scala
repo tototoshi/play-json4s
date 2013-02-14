@@ -25,7 +25,7 @@ import play.api.test.Helpers._
 
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
-import com.github.tototoshi.play2.json4s.test.jackson._
+import com.github.tototoshi.play2.json4s.test.jackson.Helpers._
 
 case class Person(id: Long, name: String, age: Int)
 
@@ -44,25 +44,18 @@ object TestApplication extends Controller with Json4s {
 }
 
 
-class Json4sPlayModuleSpec extends Specification with Json4s with JacksonHelpers {
-
-  val testJson = """{"id":1,"name":"ぱみゅぱみゅ","age":20}"""
+class Json4sPlayModuleSpec extends Specification with Json4s {
 
   "Json4sPlayModule" should {
 
     "allow you to use json4s-jackson value as response" in {
-
-      def removeWhiteSpaceAndNewLine(s: String): String = s.replace(" ", "").replace("\n", "")
-
       val res = TestApplication.get(FakeRequest("GET", ""))
-
-      contentType(res) must beEqualTo (Some("application/json"))
-      removeWhiteSpaceAndNewLine(contentAsString(res)) must beEqualTo (testJson)
+      contentType(res) must beSome("application/json")
+      contentAsJson4s(res) must_== (JObject(List(("id",JInt(1)), ("name",JString("ぱみゅぱみゅ")), ("age",JInt(20)))))
     }
 
     "accept jackson4s-json request" in {
-      val header = FakeHeaders(Seq(("Content-Type" -> Seq("application/json"))))
-      val res = TestApplication.post(FakeRequest().withJson4sBody(parse(testJson)))
+      val res = TestApplication.post(FakeRequest().withJson4sBody(parse("""{"id":1,"name":"ぱみゅぱみゅ","age":20}""")))
       contentAsString(res) must beEqualTo ("ぱみゅぱみゅ")
     }
 

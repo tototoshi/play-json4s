@@ -25,7 +25,7 @@ import play.api.test.Helpers._
 
 import org.json4s._
 import org.json4s.native.JsonMethods._
-import com.github.tototoshi.play2.json4s.test.native._
+import com.github.tototoshi.play2.json4s.test.native.Helpers._
 
 case class Person(id: Long, name: String, age: Int)
 
@@ -44,25 +44,19 @@ object TestApplication extends Controller with Json4s {
 }
 
 
-class PlayModuleSpec extends Specification with Json4s with NativeHelpers {
-
-  val testJson = """{"id":1,"name":"ぱみゅぱみゅ","age":20}"""
+class PlayModuleSpec extends Specification with Json4s {
 
   "Json4sPlayModule" should {
 
     "allow you to use json4s-native value as response" in {
-
-      def removeWhiteSpaceAndNewLine(s: String): String = s.replace(" ", "").replace("\n", "")
-
       val res = TestApplication.get(FakeRequest("GET", ""))
-
-      contentType(res) must beEqualTo (Some("application/json"))
-      removeWhiteSpaceAndNewLine(contentAsString(res)) must beEqualTo (testJson)
+      contentType(res) must beSome("application/json")
+      contentAsJson4s(res) must_== (JObject(List(("id",JInt(1)), ("name",JString("ぱみゅぱみゅ")), ("age",JInt(20)))))
     }
 
     "accept native json request" in {
-      val header = FakeHeaders(Seq(("Content-Type" -> Seq("application/json"))))
-      val res = TestApplication.post(FakeRequest().withJson4sBody(parse(testJson)))
+      val fakeRequest = FakeRequest().withJson4sBody(parse("""{"id":1,"name":"ぱみゅぱみゅ","age":20}"""))
+      val res = TestApplication.post(fakeRequest)
       contentAsString(res) must beEqualTo ("ぱみゅぱみゅ")
     }
 
