@@ -25,7 +25,7 @@ import play.api.test.Helpers._
 
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
-import com.github.tototoshi.play2.json4s.test.Implicits._
+import com.github.tototoshi.play2.json4s.test.jackson._
 
 case class Person(id: Long, name: String, age: Int)
 
@@ -44,7 +44,7 @@ object TestApplication extends Controller with Json4s {
 }
 
 
-class Json4sPlayModuleSpec extends Specification with Json4s {
+class Json4sPlayModuleSpec extends Specification with Json4s with JacksonHelpers {
 
   val testJson = """{"id":1,"name":"ぱみゅぱみゅ","age":20}"""
 

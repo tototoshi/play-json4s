@@ -13,17 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.github.tototoshi.play2.json4s.test.native
 
-package com.github.tototoshi.play2.json4s.test
+import scala.text.Document
+import com.github.tototoshi.play2.json4s.core._
+import com.github.tototoshi.play2.json4s.test.core._
 
-import org.json4s._
-import play.api.mvc._
-import play.api.test._
+trait NativeHelpers extends Helpers[Document] with MethodsImport[Document]
 
-object Implicits {
 
-  implicit class Json4sFakeRequest[A](fakeRequest: FakeRequest[A]) {
-    def withJson4sBody(jval: JValue): Request[JValue] = fakeRequest.withBody(body = jval)
-  }
 
-}

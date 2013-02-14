@@ -20,10 +20,10 @@ object Json4sPlayModuleBuild extends Build {
 
 
   lazy val core = Project(
-    id = "json4s-core-play-module",
+    id = "play-json4s-core",
     base = file("core"),
     settings = Project.defaultSettings ++ Seq(
-      name := "json4s-core-play-module",
+      name := "play-json4s-core",
       organization := "com.github.tototoshi",
       version := _version,
       scalaVersion := _scalaVersion,
@@ -35,11 +35,11 @@ object Json4sPlayModuleBuild extends Build {
     )
   )
 
-  lazy val test = Project(
-    id = "json4s-test-play-module",
-    base = file("test"),
+  lazy val testCore = Project(
+    id = "play-json4s-test-core",
+    base = file("test-core"),
     settings = Project.defaultSettings ++ Seq(
-      name := "json4s-test-play-module",
+      name := "play-json4s-test-core",
       organization := "com.github.tototoshi",
       version := _version,
       scalaVersion := _scalaVersion,
@@ -51,13 +51,49 @@ object Json4sPlayModuleBuild extends Build {
       ),
       resolvers += typesafeRepo
     )
-  )
+  ).dependsOn(core)
+
+  lazy val testNative = Project(
+    id = "play-json4s-test-native",
+    base = file("test-native"),
+    settings = Project.defaultSettings ++ Seq(
+      name := "play-json4s-test-native",
+      organization := "com.github.tototoshi",
+      version := _version,
+      scalaVersion := _scalaVersion,
+      scalacOptions ++= Seq("-feature"),
+      libraryDependencies ++= Seq(
+        playApi % "provided",
+        playTest % "provided",
+        json4sNative
+      ),
+      resolvers += typesafeRepo
+    )
+  ).dependsOn(core, testCore)
+
+  lazy val testJackson = Project(
+    id = "play-json4s-test-jackson",
+    base = file("test-jackson"),
+    settings = Project.defaultSettings ++ Seq(
+      name := "play-json4s-test-jackson",
+      organization := "com.github.tototoshi",
+      version := _version,
+      scalaVersion := _scalaVersion,
+      scalacOptions ++= Seq("-feature"),
+      libraryDependencies ++= Seq(
+        playApi % "provided",
+        playTest % "provided",
+        json4sJackson
+      ),
+      resolvers += typesafeRepo
+    )
+  ).dependsOn(core, testCore)
 
   lazy val native = Project(
-    id = "json4s-native-play-module",
+    id = "play-json4s-native",
     base = file("native"),
     settings = Project.defaultSettings ++ Seq(
-      name := "json4s-native-play-module",
+      name := "play-json4s-native",
       organization := "com.github.tototoshi",
       version := _version,
       scalaVersion := _scalaVersion,
@@ -67,13 +103,13 @@ object Json4sPlayModuleBuild extends Build {
       ),
       resolvers += typesafeRepo
     )
-  ).dependsOn(core, test % "test")
+  ).dependsOn(core, testNative % "test")
 
   lazy val jackson = Project(
-    id = "json4s-jackson-play-module",
+    id = "play-json4s-jackson",
     base = file("jackson"),
     settings = Project.defaultSettings ++ Seq(
-      name := "json4s-jackson-play-module",
+      name := "play-json4s-jackson",
       organization := "com.github.tototoshi",
       version := _version,
       scalaVersion := _scalaVersion,
@@ -83,17 +119,13 @@ object Json4sPlayModuleBuild extends Build {
       ),
       resolvers += typesafeRepo
     )
-<<<<<<< Updated upstream
-  ).dependsOn(core, test % "test")
-=======
-  ).dependsOn(core, test % "test->compile")
->>>>>>> Stashed changes
+  ).dependsOn(core, testJackson % "test")
 
   lazy val json4sPlayModule = Project(
-    id = "json4s-play-module",
+    id = "json4s",
     base = file("."),
     settings = Project.defaultSettings ++ Seq(
-      name := "json4s-play-module",
+      name := "json4s",
       organization := "com.github.tototoshi",
       version := _version,
       scalaVersion := _scalaVersion,
@@ -103,5 +135,5 @@ object Json4sPlayModuleBuild extends Build {
       publish := {},
       publishLocal := {}
     )
-  ).aggregate(native, jackson, core, test)
+  ).aggregate(native, jackson, core, testCore, testNative, testJackson)
 }
