@@ -54,7 +54,7 @@ class Json4sPlayModuleSpec extends Specification with Json4s {
       contentAsJson4s(res) must_== (JObject(List(("id",JInt(1)), ("name",JString("ぱみゅぱみゅ")), ("age",JInt(20)))))
     }
 
-    "accept jackson4s-json request" in {
+    "accept json4s-jackson request" in {
       val res = TestApplication.post(FakeRequest().withJson4sBody(parse("""{"id":1,"name":"ぱみゅぱみゅ","age":20}""")))
       contentAsString(res) must beEqualTo ("ぱみゅぱみゅ")
     }
