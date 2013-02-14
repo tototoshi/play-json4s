@@ -6,13 +6,14 @@ object PlayJson4sBuild extends Build {
   val _version = "0.1.0"
   val _scalaVersion = "2.10.0"
   val _json4sVersion = "3.1.0"
+  val _playVersion = "2.1.0"
 
   val json4sCore = "org.json4s" %% "json4s-core" % _json4sVersion
   val json4sNative = "org.json4s" %% "json4s-native" % _json4sVersion
   val json4sJackson = "org.json4s" %% "json4s-jackson" % _json4sVersion
 
-  val playApi = "play" %% "play" % "2.1.0"
-  val playTest = "play" %% "play-test" % "2.1.0"
+  val playApi = "play" %% "play" % _playVersion
+  val playTest = "play" %% "play-test" % _playVersion
 
   val playDependencies = Seq(playApi % "provided", playTest % "test")
 
@@ -31,7 +32,11 @@ object PlayJson4sBuild extends Build {
       libraryDependencies ++= playDependencies ++ Seq(
         json4sCore
       ),
-      resolvers += typesafeRepo
+      resolvers += typesafeRepo,
+      publishMavenStyle := true,
+      publishTo <<= version { (v: String) => _publishTo(v) },
+      publishArtifact in Test := false,
+      pomExtra := _pomExtra
     )
   )
 
@@ -49,7 +54,11 @@ object PlayJson4sBuild extends Build {
         playTest % "provided",
         json4sCore
       ),
-      resolvers += typesafeRepo
+      resolvers += typesafeRepo,
+      publishMavenStyle := true,
+      publishTo <<= version { (v: String) => _publishTo(v) },
+      publishArtifact in Test := false,
+      pomExtra := _pomExtra
     )
   ).dependsOn(core)
 
@@ -67,7 +76,11 @@ object PlayJson4sBuild extends Build {
         playTest % "provided",
         json4sNative
       ),
-      resolvers += typesafeRepo
+      resolvers += typesafeRepo,
+      publishMavenStyle := true,
+      publishTo <<= version { (v: String) => _publishTo(v) },
+      publishArtifact in Test := false,
+      pomExtra := _pomExtra
     )
   ).dependsOn(core, testCore)
 
@@ -85,7 +98,11 @@ object PlayJson4sBuild extends Build {
         playTest % "provided",
         json4sJackson
       ),
-      resolvers += typesafeRepo
+      resolvers += typesafeRepo,
+      publishMavenStyle := true,
+      publishTo <<= version { (v: String) => _publishTo(v) },
+      publishArtifact in Test := false,
+      pomExtra := _pomExtra
     )
   ).dependsOn(core, testCore)
 
@@ -101,7 +118,11 @@ object PlayJson4sBuild extends Build {
       libraryDependencies ++= playDependencies ++ Seq(
         json4sNative
       ),
-      resolvers += typesafeRepo
+      resolvers += typesafeRepo,
+      publishMavenStyle := true,
+      publishTo <<= version { (v: String) => _publishTo(v) },
+      publishArtifact in Test := false,
+      pomExtra := _pomExtra
     )
   ).dependsOn(core, testNative % "test")
 
@@ -117,7 +138,11 @@ object PlayJson4sBuild extends Build {
       libraryDependencies ++= playDependencies ++ Seq(
         json4sJackson
       ),
-      resolvers += typesafeRepo
+      resolvers += typesafeRepo,
+      publishMavenStyle := true,
+      publishTo <<= version { (v: String) => _publishTo(v) },
+      publishArtifact in Test := false,
+      pomExtra := _pomExtra
     )
   ).dependsOn(core, testJackson % "test")
 
@@ -136,4 +161,32 @@ object PlayJson4sBuild extends Build {
       publishLocal := {}
     )
   ).aggregate(native, jackson, core, testCore, testNative, testJackson)
+
+
+  def _publishTo(v: String) = {
+    val nexus = "https://oss.sonatype.org/"
+    if (v.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "content/repositories/snapshots")
+    else Some("releases" at nexus + "service/local/staging/deploy/maven2")
+  }
+
+  val _pomExtra =
+    <url>http://github.com/tototoshi/play-json4s</url>
+    <licenses>
+      <license>
+        <name>Apache License, Version 2.0</name>
+        <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+        <distribution>repo</distribution>
+      </license>
+    </licenses>
+    <scm>
+      <url>git@github.com:tototoshi/play-json4s.git</url>
+      <connection>scm:git:git@github.com:tototoshi/play-json4s.git</connection>
+    </scm>
+    <developers>
+      <developer>
+        <id>tototoshi</id>
+        <name>Toshiyuki Takahashi</name>
+        <url>http://tototoshi.github.com</url>
+      </developer>
+    </developers>
 }
