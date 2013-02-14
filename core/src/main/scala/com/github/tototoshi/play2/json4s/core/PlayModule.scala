@@ -34,7 +34,7 @@ trait Json4sParser[T] { self: MethodsImport[T] =>
   import self.methods._
 
   implicit def writeableOf_NativeJValue(implicit codec: Codec): Writeable[Json4sJValue] = {
-    Writeable((jval: Json4sJValue) => codec.encode(pretty(render(jval))))
+    Writeable((jval: Json4sJValue) => codec.encode(compact(render(jval))))
   }
 
   implicit def contentTypeOf_JsValue(implicit codec: Codec): ContentTypeOf[Json4sJValue] = {
