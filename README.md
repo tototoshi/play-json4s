@@ -1,8 +1,28 @@
 # play-json4s
 
-
 This module allows you to use json4s in your play20 application.
 
+
+## Install
+Current version is 0.1.0.
+
+Add the following lines in your build.sbt.
+
+To use json4s-native
+```scala
+libraryDependencies ++= Seq(
+  "com.github.tototoshi" %% "play-json4s-native" % "0.1.0",
+  "com.github.tototoshi" %% "play-json4s-test-native" % "0.1.0" % "test"
+)
+```
+
+To use json4s-jackson
+```scala
+libraryDependencies ++= Seq(
+  "com.github.tototoshi" %% "play-json4s-jackson" % "0.1.0",
+  "com.github.tototoshi" %% "play-json4s-test-jackson" % "0.1.0" % "test"
+)
+```
 
 ## Usage
 
