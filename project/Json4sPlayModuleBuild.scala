@@ -83,7 +83,11 @@ object Json4sPlayModuleBuild extends Build {
       ),
       resolvers += typesafeRepo
     )
+<<<<<<< Updated upstream
   ).dependsOn(core, test % "test")
+=======
+  ).dependsOn(core, test % "test->compile")
+>>>>>>> Stashed changes
 
   lazy val json4sPlayModule = Project(
     id = "json4s-play-module",
