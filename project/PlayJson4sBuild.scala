@@ -17,151 +17,103 @@ object PlayJson4sBuild extends Build {
 
   val playDependencies = Seq(playApi % "provided", playTest % "test")
 
-  val typesafeRepo = "typesafe" at "http://repo.typesafe.com/typesafe/releases"
+  val publishingSettings = Seq(
+    publishMavenStyle := true,
+    publishTo <<= version { (v: String) => _publishTo(v) },
+    publishArtifact in Test := false,
+    pomExtra := _pomExtra
+  )
 
+  val baseSettings =  Project.defaultSettings ++ Seq(
+    organization := "com.github.tototoshi",
+    version := _version,
+    scalaVersion := _scalaVersion,
+    scalacOptions ++= Seq("-feature"),
+    resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases"
+  )
 
   lazy val core = Project(
     id = "play-json4s-core",
     base = file("core"),
-    settings = Project.defaultSettings ++ Seq(
+    settings = baseSettings ++ publishingSettings ++ Seq(
       name := "play-json4s-core",
-      organization := "com.github.tototoshi",
-      version := _version,
-      scalaVersion := _scalaVersion,
-      scalacOptions ++= Seq("-feature"),
       libraryDependencies ++= playDependencies ++ Seq(
         json4sCore
-      ),
-      resolvers += typesafeRepo,
-      publishMavenStyle := true,
-      publishTo <<= version { (v: String) => _publishTo(v) },
-      publishArtifact in Test := false,
-      pomExtra := _pomExtra
+      )
     )
   )
 
   lazy val testCore = Project(
     id = "play-json4s-test-core",
     base = file("test-core"),
-    settings = Project.defaultSettings ++ Seq(
+    settings = baseSettings ++ publishingSettings ++ Seq(
       name := "play-json4s-test-core",
-      organization := "com.github.tototoshi",
-      version := _version,
-      scalaVersion := _scalaVersion,
-      scalacOptions ++= Seq("-feature"),
       libraryDependencies ++= Seq(
         playApi % "provided",
         playTest % "provided",
         json4sCore
-      ),
-      resolvers += typesafeRepo,
-      publishMavenStyle := true,
-      publishTo <<= version { (v: String) => _publishTo(v) },
-      publishArtifact in Test := false,
-      pomExtra := _pomExtra
+      )
     )
   ).dependsOn(core)
 
   lazy val testNative = Project(
     id = "play-json4s-test-native",
     base = file("test-native"),
-    settings = Project.defaultSettings ++ Seq(
+    settings = baseSettings ++ publishingSettings ++ Seq(
       name := "play-json4s-test-native",
-      organization := "com.github.tototoshi",
-      version := _version,
-      scalaVersion := _scalaVersion,
-      scalacOptions ++= Seq("-feature"),
       libraryDependencies ++= Seq(
         playApi % "provided",
         playTest % "provided",
         json4sNative
-      ),
-      resolvers += typesafeRepo,
-      publishMavenStyle := true,
-      publishTo <<= version { (v: String) => _publishTo(v) },
-      publishArtifact in Test := false,
-      pomExtra := _pomExtra
+      )
     )
   ).dependsOn(core, testCore)
 
   lazy val testJackson = Project(
     id = "play-json4s-test-jackson",
     base = file("test-jackson"),
-    settings = Project.defaultSettings ++ Seq(
+    settings = baseSettings ++ publishingSettings ++ Seq(
       name := "play-json4s-test-jackson",
-      organization := "com.github.tototoshi",
-      version := _version,
-      scalaVersion := _scalaVersion,
-      scalacOptions ++= Seq("-feature"),
       libraryDependencies ++= Seq(
         playApi % "provided",
         playTest % "provided",
         json4sJackson
-      ),
-      resolvers += typesafeRepo,
-      publishMavenStyle := true,
-      publishTo <<= version { (v: String) => _publishTo(v) },
-      publishArtifact in Test := false,
-      pomExtra := _pomExtra
+      )
     )
   ).dependsOn(core, testCore)
 
   lazy val native = Project(
     id = "play-json4s-native",
     base = file("native"),
-    settings = Project.defaultSettings ++ Seq(
+    settings = baseSettings ++ publishingSettings ++ Seq(
       name := "play-json4s-native",
-      organization := "com.github.tototoshi",
-      version := _version,
-      scalaVersion := _scalaVersion,
-      scalacOptions ++= Seq("-feature"),
       libraryDependencies ++= playDependencies ++ Seq(
         json4sNative
-      ),
-      resolvers += typesafeRepo,
-      publishMavenStyle := true,
-      publishTo <<= version { (v: String) => _publishTo(v) },
-      publishArtifact in Test := false,
-      pomExtra := _pomExtra
+      )
     )
   ).dependsOn(core, testNative % "test")
 
   lazy val jackson = Project(
     id = "play-json4s-jackson",
     base = file("jackson"),
-    settings = Project.defaultSettings ++ Seq(
+    settings = baseSettings ++ publishingSettings ++ Seq(
       name := "play-json4s-jackson",
-      organization := "com.github.tototoshi",
-      version := _version,
-      scalaVersion := _scalaVersion,
-      scalacOptions ++= Seq("-feature"),
       libraryDependencies ++= playDependencies ++ Seq(
         json4sJackson
-      ),
-      resolvers += typesafeRepo,
-      publishMavenStyle := true,
-      publishTo <<= version { (v: String) => _publishTo(v) },
-      publishArtifact in Test := false,
-      pomExtra := _pomExtra
+      )
     )
   ).dependsOn(core, testJackson % "test")
 
   lazy val playJson4s = Project(
     id = "play-json4s",
     base = file("."),
-    settings = Project.defaultSettings ++ Seq(
+    settings = baseSettings ++ Seq(
       name := "json4s",
-      organization := "com.github.tototoshi",
-      version := _version,
-      scalaVersion := _scalaVersion,
-      scalacOptions ++= Seq("-feature"),
-      resolvers += typesafeRepo,
       publishArtifact := false,
       publish := {},
       publishLocal := {}
     )
   ).aggregate(native, jackson, core, testCore, testNative, testJackson)
-
 
   def _publishTo(v: String) = {
     val nexus = "https://oss.sonatype.org/"
