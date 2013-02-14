@@ -1,7 +1,7 @@
 import sbt._
 import sbt.Keys._
 
-object Json4sPlayModuleBuild extends Build {
+object PlayJson4sBuild extends Build {
 
   val _version = "0.1.0"
   val _scalaVersion = "2.10.0"
@@ -121,8 +121,8 @@ object Json4sPlayModuleBuild extends Build {
     )
   ).dependsOn(core, testJackson % "test")
 
-  lazy val json4sPlayModule = Project(
-    id = "json4s",
+  lazy val playJson4s = Project(
+    id = "play-json4s",
     base = file("."),
     settings = Project.defaultSettings ++ Seq(
       name := "json4s",
