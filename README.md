@@ -68,6 +68,15 @@ object Application extends Controller with Json4s {
 }
 ```
 
+### With WS
+
+You can use json4s objects as request body.
+
+```scala
+WS.url("http://localhost:" + port + "/foo")
+  .post(Extraction.decompose(Person(1, "pamyupamyu", 20))),
+```
+
 ### With tests
 
 This module also provides test helpers for Json4s.

@@ -24,6 +24,7 @@ import play.api.test.Helpers._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import com.github.tototoshi.play2.json4s.test.jackson.Helpers._
+import com.github.tototoshi.play2.json4s.test.MockServer
 
 import org.scalatest.FunSpec
 import org.scalatest.matchers._
@@ -47,7 +48,7 @@ object TestApplication extends Controller with Json4s {
 
 
 
-class PlayModuleSpec extends FunSpec with ShouldMatchers {
+class PlayModuleSpec extends FunSpec with ShouldMatchers with MockServer with Json4s {
 
   describe ("Json4sPlayModule") {
 
@@ -62,6 +63,42 @@ class PlayModuleSpec extends FunSpec with ShouldMatchers {
       it ("accept json4s-jackson request") {
         val res = TestApplication.post(FakeRequest().withJson4sBody(parse("""{"id":1,"name":"ぱみゅぱみゅ","age":20}""")))
         contentAsString(res) should be ("ぱみゅぱみゅ")
+      }
+
+    }
+
+    describe ("With WS") {
+
+      it ("should enable you to use json4s objects as request body") {
+        import unfiltered.filter._
+        import unfiltered.request._
+        import unfiltered.response._
+        import play.api.libs.ws.WS
+        import scala.concurrent._
+        import scala.concurrent.duration._
+        import scala.language.postfixOps
+        import org.apache.commons.io.IOUtils
+
+        implicit val formats = DefaultFormats
+
+        val plan = Planify {
+          case request @ Path("/foo") => {
+            val in = request.inputStream
+            try {
+              ResponseString(IOUtils.toString(in))
+            } finally {
+              IOUtils.closeQuietly(in)
+            }
+          }
+        }
+        withMockServer(plan) { port =>
+          val res = Await.result(
+            WS.url("http://localhost:" + port + "/foo")
+              .post(Extraction.decompose(Person(1, "ぱみゅぱみゅ", 20))),
+            5 seconds
+          )
+          res.body should be ("""{"id":1,"name":"ぱみゅぱみゅ","age":20}""")
+        }
       }
 
     }

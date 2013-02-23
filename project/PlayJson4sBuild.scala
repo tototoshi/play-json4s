@@ -18,6 +18,12 @@ object PlayJson4sBuild extends Build {
 
   val playDependencies = Seq(playApi % "provided", playTest % "test")
 
+  val unfilteredVersion = "0.6.7"
+  val unfilteredFilter = "net.databinder" %% "unfiltered-filter" % unfilteredVersion
+  val unfilteredJetty =  "net.databinder" %% "unfiltered-jetty" % unfilteredVersion
+  val unfilteredDependencies = Seq(unfilteredFilter, unfilteredJetty)
+  val unfilteredDependenciesForTest = Seq(unfilteredFilter % "test", unfilteredJetty % "test")
+
   val publishingSettings = Seq(
     publishMavenStyle := true,
     publishTo <<= version { (v: String) => _publishTo(v) },
@@ -93,7 +99,7 @@ object PlayJson4sBuild extends Build {
         scalatest % "test"
       )
     )
-  ).dependsOn(core, testNative % "test")
+  ).dependsOn(core, testNative % "test", testHelper % "test")
 
   lazy val jackson = Project(
     id = "play-json4s-jackson",
@@ -105,7 +111,16 @@ object PlayJson4sBuild extends Build {
         scalatest % "test"
       )
     )
-  ).dependsOn(core, testJackson % "test")
+  ).dependsOn(core, testJackson % "test", testHelper % "test")
+
+  lazy val testHelper = Project(
+    id = "play-json4s-test-helper",
+    base = file("test-helper"),
+    settings = baseSettings ++ Seq(
+      name := "play-json4s-test-helper",
+      libraryDependencies ++= unfilteredDependencies
+    )
+  )
 
   lazy val playJson4s = Project(
     id = "play-json4s",
