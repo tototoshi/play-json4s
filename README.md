@@ -73,7 +73,7 @@ object Application extends Controller with Json4s {
 You can use json4s objects as request body.
 
 ```scala
-WS.url("http://localhost:" + port + "/foo")
+WS.url("http://......")
   .post(Extraction.decompose(Person(1, "pamyupamyu", 20))),
 ```
 
