@@ -16,8 +16,6 @@
 
 package com.github.tototoshi.play2.json4s.jackson
 
-import org.specs2.mutable._
-
 import play.api._
 import play.api.mvc._
 import play.api.test._
@@ -26,6 +24,10 @@ import play.api.test.Helpers._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import com.github.tototoshi.play2.json4s.test.jackson.Helpers._
+
+import org.scalatest.FunSpec
+import org.scalatest.matchers._
+
 
 case class Person(id: Long, name: String, age: Int)
 
@@ -44,22 +46,28 @@ object TestApplication extends Controller with Json4s {
 }
 
 
-class Json4sPlayModuleSpec extends Specification {
 
-  "Json4sPlayModule" should {
+class PlayModuleSpec extends FunSpec with ShouldMatchers {
 
-    "allow you to use json4s-jackson value as response" in {
-      val res = TestApplication.get(FakeRequest("GET", ""))
-      contentType(res) must beSome("application/json")
-      contentAsJson4s(res) must_== (JObject(List(("id",JInt(1)), ("name",JString("ぱみゅぱみゅ")), ("age",JInt(20)))))
-    }
+  describe ("Json4sPlayModule") {
 
-    "accept json4s-jackson request" in {
-      val res = TestApplication.post(FakeRequest().withJson4sBody(parse("""{"id":1,"name":"ぱみゅぱみゅ","age":20}""")))
-      contentAsString(res) must beEqualTo ("ぱみゅぱみゅ")
+    describe ("With controllers") {
+
+      it ("allow you to use json4s-jackson value as response") {
+        val res = TestApplication.get(FakeRequest("GET", ""))
+        contentType(res) should be (Some("application/json"))
+        contentAsJson4s(res) should be (JObject(List(("id",JInt(1)), ("name",JString("ぱみゅぱみゅ")), ("age",JInt(20)))))
+      }
+
+      it ("accept json4s-jackson request") {
+        val res = TestApplication.post(FakeRequest().withJson4sBody(parse("""{"id":1,"name":"ぱみゅぱみゅ","age":20}""")))
+        contentAsString(res) should be ("ぱみゅぱみゅ")
+      }
+
     }
 
   }
 
 }
+
 

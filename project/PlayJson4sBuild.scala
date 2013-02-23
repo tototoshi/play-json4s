@@ -11,6 +11,7 @@ object PlayJson4sBuild extends Build {
   val json4sCore = "org.json4s" %% "json4s-core" % _json4sVersion
   val json4sNative = "org.json4s" %% "json4s-native" % _json4sVersion
   val json4sJackson = "org.json4s" %% "json4s-jackson" % _json4sVersion
+  val scalatest = "org.scalatest" %% "scalatest" % "1.9.1"
 
   val playApi = "play" %% "play" % _playVersion
   val playTest = "play" %% "play-test" % _playVersion
@@ -88,7 +89,8 @@ object PlayJson4sBuild extends Build {
     settings = baseSettings ++ publishingSettings ++ Seq(
       name := "play-json4s-native",
       libraryDependencies ++= playDependencies ++ Seq(
-        json4sNative
+        json4sNative,
+        scalatest % "test"
       )
     )
   ).dependsOn(core, testNative % "test")
@@ -99,7 +101,8 @@ object PlayJson4sBuild extends Build {
     settings = baseSettings ++ publishingSettings ++ Seq(
       name := "play-json4s-jackson",
       libraryDependencies ++= playDependencies ++ Seq(
-        json4sJackson
+        json4sJackson,
+        scalatest % "test"
       )
     )
   ).dependsOn(core, testJackson % "test")

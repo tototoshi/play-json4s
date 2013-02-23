@@ -16,8 +16,6 @@
 
 package com.github.tototoshi.play2.json4s.native
 
-import org.specs2.mutable._
-
 import play.api._
 import play.api.mvc._
 import play.api.test._
@@ -26,6 +24,9 @@ import play.api.test.Helpers._
 import org.json4s._
 import org.json4s.native.JsonMethods._
 import com.github.tototoshi.play2.json4s.test.native.Helpers._
+
+import org.scalatest.FunSpec
+import org.scalatest.matchers._
 
 case class Person(id: Long, name: String, age: Int)
 
@@ -44,23 +45,28 @@ object TestApplication extends Controller with Json4s {
 }
 
 
-class PlayModuleSpec extends Specification {
-
-  "Json4sPlayModule" should {
-
-    "allow you to use json4s-native value as response" in {
-      val res = TestApplication.get(FakeRequest("GET", ""))
-      contentType(res) must beSome("application/json")
-      contentAsJson4s(res) must_== (JObject(List(("id",JInt(1)), ("name",JString("ぱみゅぱみゅ")), ("age",JInt(20)))))
-    }
-
-    "accept native json request" in {
-      val fakeRequest = FakeRequest().withJson4sBody(parse("""{"id":1,"name":"ぱみゅぱみゅ","age":20}"""))
-      val res = TestApplication.post(fakeRequest)
-      contentAsString(res) must beEqualTo ("ぱみゅぱみゅ")
-    }
+class PlayModuleSpec extends FunSpec with ShouldMatchers {
+  def fixture = new {
 
   }
 
-}
+  describe("Json4sPlayModule") {
 
+    describe ("With controllers") {
+
+      it ("allow you to use json4s-native value as response") {
+        val res = TestApplication.get(FakeRequest("GET", ""))
+        contentType(res) should be (Some("application/json"))
+        contentAsJson4s(res) should be (JObject(List(("id",JInt(1)), ("name",JString("ぱみゅぱみゅ")), ("age",JInt(20)))))
+      }
+
+      it ("accept native json request") {
+        val fakeRequest = FakeRequest().withJson4sBody(parse("""{"id":1,"name":"ぱみゅぱみゅ","age":20}"""))
+        val res = TestApplication.post(fakeRequest)
+        contentAsString(res) should be ("ぱみゅぱみゅ")
+      }
+
+    }
+
+  }
+}
