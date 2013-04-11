@@ -4,9 +4,9 @@ import sbt.Keys._
 object PlayJson4sBuild extends Build {
 
   val _version = "0.1.0"
-  val _scalaVersion = "2.10.0"
-  val _json4sVersion = "3.1.0"
-  val _playVersion = "2.1.0"
+  val _scalaVersion = "2.10.1"
+  val _json4sVersion = "3.2.4"
+  val _playVersion = "2.1.1"
 
   val json4sCore = "org.json4s" %% "json4s-core" % _json4sVersion
   val json4sNative = "org.json4s" %% "json4s-native" % _json4sVersion
@@ -18,7 +18,7 @@ object PlayJson4sBuild extends Build {
 
   val playDependencies = Seq(playApi % "provided", playTest % "test")
 
-  val unfilteredVersion = "0.6.7"
+  val unfilteredVersion = "0.6.8"
   val unfilteredFilter = "net.databinder" %% "unfiltered-filter" % unfilteredVersion
   val unfilteredJetty =  "net.databinder" %% "unfiltered-jetty" % unfilteredVersion
   val unfilteredDependencies = Seq(unfilteredFilter, unfilteredJetty)
