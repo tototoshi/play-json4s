@@ -3,18 +3,18 @@ import sbt.Keys._
 
 object PlayJson4sBuild extends Build {
 
-  val _version = "0.1.0"
+  val _version = "0.2.0"
   val _scalaVersion = "2.10.1"
-  val _json4sVersion = "3.2.4"
-  val _playVersion = "2.1.1"
+  val _json4sVersion = "3.2.5"
+  val _playVersion = "2.2.0"
 
   val json4sCore = "org.json4s" %% "json4s-core" % _json4sVersion
   val json4sNative = "org.json4s" %% "json4s-native" % _json4sVersion
   val json4sJackson = "org.json4s" %% "json4s-jackson" % _json4sVersion
   val scalatest = "org.scalatest" %% "scalatest" % "1.9.1"
 
-  val playApi = "play" %% "play" % _playVersion
-  val playTest = "play" %% "play-test" % _playVersion
+  val playApi = "com.typesafe.play" %% "play" % _playVersion
+  val playTest = "com.typesafe.play" %% "play-test" % _playVersion
 
   val playDependencies = Seq(playApi % "provided", playTest % "test")
 
