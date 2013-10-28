@@ -21,15 +21,17 @@ import play.api.http._
 import play.api.mvc._
 import play.api.libs.iteratee._
 import org.json4s._
-import org.json4s.{ JValue => Json4sJValue }
+import org.json4s.{JValue => Json4sJValue}
 import scala.language.reflectiveCalls
-
+import scala.concurrent.Future
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 trait MethodsImport[T] {
   val methods: JsonMethods[T]
 }
 
-trait Json4sParser[T] { self: MethodsImport[T] =>
+trait Json4sParser[T] {
+  self: MethodsImport[T] =>
 
   import self.methods._
 
@@ -41,29 +43,62 @@ trait Json4sParser[T] { self: MethodsImport[T] =>
     ContentTypeOf(Some(ContentTypes.JSON))
   }
 
-  def tolerantJson(maxLength: Int): BodyParser[Json4sJValue] = BodyParser("json, maxLength=" + maxLength) { request =>
-    play.api.libs.iteratee.Traversable.takeUpTo[Array[Byte]](maxLength).apply(Iteratee.consume[Array[Byte]]().map { bytes =>
-      scala.util.control.Exception.allCatch[Json4sJValue].either {
-        parse(new String(bytes, request.charset.getOrElse("utf-8")))
-      }.left.map { e =>
-        (Play.maybeApplication.map(_.global.onBadRequest(request, "Invalid Json")).getOrElse(Results.BadRequest), bytes)
-      }
-    }).flatMap(Iteratee.eofOrElse(Results.EntityTooLarge))
-    .flatMap {
-      case Left(b) => Done(Left(b), Input.Empty)
-      case Right(it) => it.flatMap {
-        case Left((r, in)) => Done(Left(r), Input.El(in))
-        case Right(json) => Done(Right(json), Input.Empty)
-      }
+  /**
+   * This method is copied from Play 2.2
+   */
+  def DEFAULT_MAX_TEXT_LENGTH: Int = Play.maybeApplication.flatMap { app =>
+    app.configuration.getBytes("parsers.text.maxLength").map(_.toInt)
+  }.getOrElse(1024 * 100)
+
+  /**
+   * This method is copied from Play 2.2
+   */
+  private def tolerantBodyParser[A](name: String, maxLength: Int, errorMessage: String)(parser: (RequestHeader, Array[Byte]) => A): BodyParser[A] =
+    BodyParser(name + ", maxLength=" + maxLength) {
+      request =>
+        import scala.util.control.Exception._
+
+        val bodyParser: Iteratee[Array[Byte], Either[SimpleResult, Either[Future[SimpleResult], A]]] =
+          Traversable.takeUpTo[Array[Byte]](maxLength).transform(
+            Iteratee.consume[Array[Byte]]().map {
+              bytes =>
+                allCatch[A].either {
+                  parser(request, bytes)
+                }.left.map {
+                  e =>
+                    createBadResult(errorMessage)(request)
+                }
+            }
+          ).flatMap(Iteratee.eofOrElse(Results.EntityTooLarge))
+
+        bodyParser.mapM {
+          case Left(tooLarge) => Future.successful(Left(tooLarge))
+          case Right(Left(badResult)) => badResult.map(Left.apply)
+          case Right(Right(body)) => Future.successful(Right(body))
+        }
     }
+
+  def tolerantJson(maxLength: Int): BodyParser[Json4sJValue] =
+    tolerantBodyParser[Json4sJValue]("json", maxLength, "Invalid Json") {
+      (request, bytes) =>
+        parse(new String(bytes, request.charset.getOrElse("utf-8")))
+    }
+
+  /**
+   * Parse the body as Json without checking the Content-Type.
+   */
+  def tolerantJson: BodyParser[Json4sJValue] = tolerantJson(DEFAULT_MAX_TEXT_LENGTH)
+
+  private def createBadResult(msg: String): RequestHeader => Future[SimpleResult] = {
+    request =>
+      Play.maybeApplication.map(_.global.onBadRequest(request, "Expecting xml body"))
+        .getOrElse(Future.successful(Results.BadRequest))
   }
 
-  def tolerantJson: BodyParser[Json4sJValue] = tolerantJson(BodyParsers.parse.DEFAULT_MAX_TEXT_LENGTH)
-
   def json(maxLength: Int): BodyParser[Json4sJValue] = BodyParsers.parse.when(
-    _.contentType.exists(m => m == "text/json" || m == "application/json"),
+    _.contentType.exists(m => m.equalsIgnoreCase("text/json") || m.equalsIgnoreCase("application/json")),
     tolerantJson(maxLength),
-    request => Play.maybeApplication.map(_.global.onBadRequest(request, "Expecting text/json or application/json body")).getOrElse(Results.BadRequest)
+    createBadResult("Expecting text/json or application/json body")
   )
 
   def json: BodyParser[Json4sJValue] = json(BodyParsers.parse.DEFAULT_MAX_TEXT_LENGTH)

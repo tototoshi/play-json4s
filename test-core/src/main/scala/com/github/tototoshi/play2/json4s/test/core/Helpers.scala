@@ -15,19 +15,20 @@
  */
 package com.github.tototoshi.play2.json4s.test.core
 
-import play.api.mvc.{ Result, Content, Request }
+import play.api.mvc.{SimpleResult, Content, Request}
 import play.api.test._
-import play.api.test.Helpers._
 import org.json4s._
 import com.github.tototoshi.play2.json4s.core._
+import scala.concurrent.Future
+import akka.util.Timeout
 
 trait Helpers[T] { self: MethodsImport[T] =>
 
   import self.methods._
 
-  def contentAsJson4s(of: Result): JValue = parse(contentAsString(of))
+  def contentAsJson4s(of: Future[SimpleResult])(implicit timeout: Timeout): JValue = parse(Helpers.contentAsString(of))
 
-  def contentAsJson4s(of: Content): JValue = parse(of.body)
+  def contentAsJson4s(of: Content)(implicit timeout: Timeout): JValue = parse(of.body)
 
   implicit class Json4sFakeRequest[A](fakeRequest: FakeRequest[A]) {
     def withJson4sBody(jval: JValue): Request[JValue] =
