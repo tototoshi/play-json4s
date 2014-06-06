@@ -58,7 +58,7 @@ trait Json4sParser[T] {
       request =>
         import scala.util.control.Exception._
 
-        val bodyParser: Iteratee[Array[Byte], Either[SimpleResult, Either[Future[SimpleResult], A]]] =
+        val bodyParser: Iteratee[Array[Byte], Either[Result, Either[Future[Result], A]]] =
           Traversable.takeUpTo[Array[Byte]](maxLength).transform(
             Iteratee.consume[Array[Byte]]().map {
               bytes =>
@@ -89,7 +89,7 @@ trait Json4sParser[T] {
    */
   def tolerantJson: BodyParser[Json4sJValue] = tolerantJson(DEFAULT_MAX_TEXT_LENGTH)
 
-  private def createBadResult(msg: String): RequestHeader => Future[SimpleResult] = {
+  private def createBadResult(msg: String): RequestHeader => Future[Result] = {
     request =>
       Play.maybeApplication.map(_.global.onBadRequest(request, "Expecting xml body"))
         .getOrElse(Future.successful(Results.BadRequest))

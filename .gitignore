@@ -1,1 +1,4 @@
 target/
+logs/
+.DS_Store
+*.class

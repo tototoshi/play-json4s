@@ -3,22 +3,22 @@ import sbt.Keys._
 
 object PlayJson4sBuild extends Build {
 
-  val _version = "0.2.0"
-  val _scalaVersion = "2.10.1"
-  val _json4sVersion = "3.2.5"
-  val _playVersion = "2.2.0"
+  val _version = "0.3.0-SNAPSHOT"
+  val _json4sVersion = "3.2.10"
+  val _playVersion = "2.3.0"
 
   val json4sCore = "org.json4s" %% "json4s-core" % _json4sVersion
   val json4sNative = "org.json4s" %% "json4s-native" % _json4sVersion
   val json4sJackson = "org.json4s" %% "json4s-jackson" % _json4sVersion
-  val scalatest = "org.scalatest" %% "scalatest" % "1.9.1"
+  val scalatest = "org.scalatest" %% "scalatest" % "2.1.7"
 
   val playApi = "com.typesafe.play" %% "play" % _playVersion
   val playTest = "com.typesafe.play" %% "play-test" % _playVersion
+  val playWS = "com.typesafe.play" %% "play-ws" % _playVersion % "test"
 
   val playDependencies = Seq(playApi % "provided", playTest % "test")
 
-  val unfilteredVersion = "0.6.8"
+  val unfilteredVersion = "0.8.0"
   val unfilteredFilter = "net.databinder" %% "unfiltered-filter" % unfilteredVersion
   val unfilteredJetty =  "net.databinder" %% "unfiltered-jetty" % unfilteredVersion
   val unfilteredDependencies = Seq(unfilteredFilter, unfilteredJetty)
@@ -31,11 +31,12 @@ object PlayJson4sBuild extends Build {
     pomExtra := _pomExtra
   )
 
-  val baseSettings =  Project.defaultSettings ++ Seq(
+  val baseSettings = Seq(
     organization := "com.github.tototoshi",
     version := _version,
-    scalaVersion := _scalaVersion,
-    scalacOptions ++= Seq("-feature"),
+    scalaVersion := "2.10.4",
+    crossScalaVersions := scalaVersion.value :: "2.11.1" :: Nil,
+    scalacOptions ++= Seq("-feature", "-deprecation"),
     resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases"
   )
 
@@ -96,7 +97,8 @@ object PlayJson4sBuild extends Build {
       name := "play-json4s-native",
       libraryDependencies ++= playDependencies ++ Seq(
         json4sNative,
-        scalatest % "test"
+        scalatest % "test",
+        playWS
       )
     )
   ).dependsOn(core, testNative % "test", testHelper % "test")
@@ -108,7 +110,8 @@ object PlayJson4sBuild extends Build {
       name := "play-json4s-jackson",
       libraryDependencies ++= playDependencies ++ Seq(
         json4sJackson,
-        scalatest % "test"
+        scalatest % "test",
+        playWS
       )
     )
   ).dependsOn(core, testJackson % "test", testHelper % "test")
