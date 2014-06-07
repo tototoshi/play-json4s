@@ -15,7 +15,7 @@
  */
 package com.github.tototoshi.play2.json4s.test.core
 
-import play.api.mvc.{SimpleResult, Content, Request}
+import play.api.mvc.{Result, Content, Request}
 import play.api.test._
 import org.json4s._
 import com.github.tototoshi.play2.json4s.core._
@@ -26,7 +26,7 @@ trait Helpers[T] { self: MethodsImport[T] =>
 
   import self.methods._
 
-  def contentAsJson4s(of: Future[SimpleResult])(implicit timeout: Timeout): JValue = parse(Helpers.contentAsString(of))
+  def contentAsJson4s(of: Future[Result])(implicit timeout: Timeout): JValue = parse(Helpers.contentAsString(of))
 
   def contentAsJson4s(of: Content)(implicit timeout: Timeout): JValue = parse(of.body)
 

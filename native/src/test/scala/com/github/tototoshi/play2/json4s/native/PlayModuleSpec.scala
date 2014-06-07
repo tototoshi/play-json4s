@@ -91,6 +91,7 @@ class PlayModuleSpec extends FunSpec with ShouldMatchers with MockServer with Js
           }
         }
         withMockServer(plan) { port =>
+          implicit val app = play.api.test.FakeApplication()
           val res = Await.result(
             WS.url("http://localhost:" + port + "/foo")
               .post(Extraction.decompose(Person(1, "ぱみゅぱみゅ", 20))),
