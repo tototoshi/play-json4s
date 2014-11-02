@@ -55,6 +55,9 @@ Json4s provides
 See below
 
 ```scala
+import org.json4s._
+import org.json4s.native.JsonMethods._
+// or import org.json4s.jackson.JsonMethods._
 case class Person(id: Long, name: String, age: Int)
 
 object Application extends Controller with Json4s {
