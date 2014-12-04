@@ -91,7 +91,7 @@ trait Json4sParser[T] {
 
   private def createBadResult(msg: String): RequestHeader => Future[Result] = {
     request =>
-      Play.maybeApplication.map(_.global.onBadRequest(request, "Expecting xml body"))
+      Play.maybeApplication.map(_.global.onBadRequest(request, "Expecting json body"))
         .getOrElse(Future.successful(Results.BadRequest))
   }
 
