@@ -3,7 +3,7 @@ import sbt.Keys._
 
 object PlayJson4sBuild extends Build {
 
-  val _version = "0.3.0"
+  val _version = "0.3.1-SNAPSHOT"
   val _json4sVersion = "3.2.10"
   val _playVersion = "2.3.0"
 
