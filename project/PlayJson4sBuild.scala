@@ -4,13 +4,13 @@ import sbt.Keys._
 object PlayJson4sBuild extends Build {
 
   val _version = "0.3.1-SNAPSHOT"
-  val _json4sVersion = "3.2.10"
-  val _playVersion = "2.3.0"
+  val _json4sVersion = "3.2.11"
+  val _playVersion = "2.3.7"
 
   val json4sCore = "org.json4s" %% "json4s-core" % _json4sVersion
   val json4sNative = "org.json4s" %% "json4s-native" % _json4sVersion
   val json4sJackson = "org.json4s" %% "json4s-jackson" % _json4sVersion
-  val scalatest = "org.scalatest" %% "scalatest" % "2.1.7"
+  val scalatest = "org.scalatest" %% "scalatest" % "2.2.2"
 
   val playApi = "com.typesafe.play" %% "play" % _playVersion
   val playTest = "com.typesafe.play" %% "play-test" % _playVersion
@@ -34,8 +34,8 @@ object PlayJson4sBuild extends Build {
   val baseSettings = Seq(
     organization := "com.github.tototoshi",
     version := _version,
-    scalaVersion := "2.10.4",
-    crossScalaVersions := scalaVersion.value :: "2.11.1" :: Nil,
+    scalaVersion := "2.11.4",
+    crossScalaVersions := scalaVersion.value :: "2.10.4" :: Nil,
     scalacOptions ++= Seq("-feature", "-deprecation"),
     resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases"
   )
