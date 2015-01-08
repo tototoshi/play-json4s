@@ -8,23 +8,23 @@ Current version is
 
   - 0.1.0 (for Play 2.1)
   - 0.2.0 (for Play 2.2)
-  - 0.3.0 (for Play 2.3)
+  - 0.3.1 (for Play 2.3)
   
 Add the following lines in your build.sbt.
 
 To use json4s-native
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.tototoshi" %% "play-json4s-native" % "0.3.0",
-  "com.github.tototoshi" %% "play-json4s-test-native" % "0.3.0" % "test"
+  "com.github.tototoshi" %% "play-json4s-native" % "0.3.1",
+  "com.github.tototoshi" %% "play-json4s-test-native" % "0.3.1" % "test"
 )
 ```
 
 To use json4s-jackson
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.tototoshi" %% "play-json4s-jackson" % "0.3.0",
-  "com.github.tototoshi" %% "play-json4s-test-jackson" % "0.3.0" % "test"
+  "com.github.tototoshi" %% "play-json4s-jackson" % "0.3.1",
+  "com.github.tototoshi" %% "play-json4s-test-jackson" % "0.3.1" % "test"
 )
 ```
 
@@ -134,6 +134,9 @@ class ApplicationSpec extends Specification {
 ```
 
 ## ChangeLog
+
+### 0.3.1
+ - Added custom parse error handler
 
 ### 0.3.0
  - Support Play 2.3
