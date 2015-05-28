@@ -136,6 +136,9 @@ class ApplicationSpec extends Specification {
 
 ## ChangeLog
 
+### 0.4.0
+ - Support Play 2.4
+
 ### 0.3.1
  - Added custom parse error handler
 
