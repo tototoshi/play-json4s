@@ -9,7 +9,8 @@ Current version is
   - 0.1.0 (for Play 2.1)
   - 0.2.0 (for Play 2.2)
   - 0.3.1 (for Play 2.3)
-  
+  - 0.4.0-SNAPSHOT (for Play 2.4)
+
 Add the following lines in your build.sbt.
 
 To use json4s-native
