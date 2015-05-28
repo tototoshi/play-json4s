@@ -15,7 +15,8 @@
  */
 package com.github.tototoshi.play2.json4s.test.core
 
-import play.api.mvc.{Result, Content, Request}
+import play.api.mvc.{Result, Request}
+import play.twirl.api.Content
 import play.api.test._
 import org.json4s._
 import com.github.tototoshi.play2.json4s.core._

@@ -115,6 +115,5 @@ trait Json4sParser[T] {
   def json(maxLength: Int): BodyParser[Json4sJValue] =
     jsonWithErrorHandler(maxLength)(defaultParseErrorHandler)
 
-  def json: BodyParser[Json4sJValue] = json(BodyParsers.parse.DEFAULT_MAX_TEXT_LENGTH)
+  def json: BodyParser[Json4sJValue] = json(BodyParsers.parse.DefaultMaxTextLength)
 }
-
