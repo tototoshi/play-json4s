@@ -136,6 +136,12 @@ class ApplicationSpec extends Specification {
 
 ## ChangeLog
 
+### 0.4.2
+- Updated json4s version to 3.3.0
+
+### 0.4.1
+ - Re-published 0.4.0 because of invalid sha1 problem of sonatype
+
 ### 0.4.0
  - Support Play 2.4
 
