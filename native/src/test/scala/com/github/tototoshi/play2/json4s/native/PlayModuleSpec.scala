@@ -31,9 +31,11 @@ import org.scalatest.matchers._
 
 case class Person(id: Long, name: String, age: Int)
 
-object TestApplication extends Controller with Json4s {
+class TestApplication(json4s: Json4s) extends Controller {
 
   implicit val formats = DefaultFormats
+
+  import json4s._
 
   def get = Action { implicit request =>
     Ok(Extraction.decompose(Person(1, "ぱみゅぱみゅ", 20)))
@@ -46,21 +48,28 @@ object TestApplication extends Controller with Json4s {
 }
 
 
-class PlayModuleSpec extends FunSpec with ShouldMatchers with MockServer with Json4s {
+class PlayModuleSpec extends FunSpec with ShouldMatchers with MockServer {
+
+  val configuration = Configuration.empty
+
+  val json4s = new Json4s(configuration)
+  import json4s._
 
   describe("Json4sPlayModule") {
 
     describe ("With controllers") {
 
       it ("allow you to use json4s-native value as response") {
-        val res = TestApplication.get(FakeRequest("GET", ""))
+        val app = new TestApplication(json4s)
+        val res = app.get(FakeRequest("GET", ""))
         contentType(res) should be (Some("application/json"))
         contentAsJson4s(res) should be (JObject(List(("id",JInt(1)), ("name",JString("ぱみゅぱみゅ")), ("age",JInt(20)))))
       }
 
       it ("accept native json request") {
         val fakeRequest = FakeRequest().withJson4sBody(parse("""{"id":1,"name":"ぱみゅぱみゅ","age":20}"""))
-        val res = TestApplication.post(fakeRequest)
+        val app = new TestApplication(json4s)
+        val res = app.post(fakeRequest)
         contentAsString(res) should be ("ぱみゅぱみゅ")
       }
 

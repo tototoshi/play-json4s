@@ -26,14 +26,9 @@ import scala.language.reflectiveCalls
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-trait MethodsImport[T] {
-  val methods: JsonMethods[T]
-}
+class Json4sParser[T] (configuration: Configuration, methods: JsonMethods[T]) {
 
-trait Json4sParser[T] {
-  self: MethodsImport[T] =>
-
-  import self.methods._
+  import methods._
 
   implicit def writeableOf_NativeJValue(implicit codec: Codec): Writeable[Json4sJValue] = {
     Writeable((jval: Json4sJValue) => codec.encode(compact(render(jval))))
@@ -43,12 +38,8 @@ trait Json4sParser[T] {
     ContentTypeOf(Some(ContentTypes.JSON))
   }
 
-  /**
-   * This method is copied from Play 2.2
-   */
-  def DEFAULT_MAX_TEXT_LENGTH: Int = Play.maybeApplication.flatMap { app =>
-    app.configuration.getBytes("parsers.text.maxLength").map(_.toInt)
-  }.getOrElse(1024 * 100)
+  def DEFAULT_MAX_TEXT_LENGTH: Int =
+    configuration.getBytes("parsers.text.maxLength").map(_.toInt).getOrElse(1024 * 100)
 
   final type ParseErrorHandler = (RequestHeader, Array[Byte], Throwable) => Future[Result]
 

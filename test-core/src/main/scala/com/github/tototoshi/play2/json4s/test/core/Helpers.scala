@@ -23,9 +23,9 @@ import com.github.tototoshi.play2.json4s.core._
 import scala.concurrent.Future
 import akka.util.Timeout
 
-trait Helpers[T] { self: MethodsImport[T] =>
+class Helpers[T](methods: JsonMethods[T]) {
 
-  import self.methods._
+  import methods._
 
   def contentAsJson4s(of: Future[Result])(implicit timeout: Timeout): JValue = parse(Helpers.contentAsString(of))
 

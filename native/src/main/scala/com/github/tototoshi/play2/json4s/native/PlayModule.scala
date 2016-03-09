@@ -16,12 +16,15 @@
 
 package com.github.tototoshi.play2.json4s.native
 
-import org.json4s._
-import org.json4s.{ JValue => Json4sJValue }
 import com.github.tototoshi.play2.json4s.core._
+import play.api.{Environment, Configuration}
+import play.api.inject.{Binding, Module}
 
-trait NativeJson extends MethodsImport[scala.text.Document] {
-  val methods = org.json4s.native.JsonMethods
+class Json4s(configuration: Configuration)
+    extends Json4sParser[scala.text.Document](configuration, org.json4s.native.JsonMethods)
+
+class Json4sModule extends Module {
+  override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] = Seq(
+    bind[Json4s].toSelf
+  )
 }
-
-trait Json4s extends Json4sParser[scala.text.Document] with NativeJson
