@@ -10,59 +10,51 @@ Current version is
   - 0.2.0 (for Play 2.2)
   - 0.3.1 (for Play 2.3)
   - 0.4.2 (for Play 2.4)
+  - 0.5.0-SNAPSHOT (for Play 2.5)
 
 Add the following lines in your build.sbt.
 
 To use json4s-native
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.tototoshi" %% "play-json4s-native" % "0.4.2",
-  "com.github.tototoshi" %% "play-json4s-test-native" % "0.4.2" % "test"
+  "com.github.tototoshi" %% "play-json4s-native" % "0.5.0-SNAPSHOT",
+  "com.github.tototoshi" %% "play-json4s-test-native" % "0.5.0-SNAPSHOT" % "test"
 )
 ```
 
 To use json4s-jackson
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.tototoshi" %% "play-json4s-jackson" % "0.4.2",
-  "com.github.tototoshi" %% "play-json4s-test-jackson" % "0.4.2" % "test"
+  "com.github.tototoshi" %% "play-json4s-jackson" % "0.5.0-SNAPSHOT",
+  "com.github.tototoshi" %% "play-json4s-test-jackson" % "0.5.0-SNAPSHOT" % "test"
 )
 ```
 
 ## Usage
 
+If you are using Play 2.4, see [README.play24.md](./README.play24.md)
+
 ### With controllers
 
-To use json4s-native
-```scala
-import com.github.tototoshi.play2.json4s.native._
+```
+play.modules.enabled += "com.github.tototoshi.play2.json4s.jackson.Json4sModule"
+// or play.modules.enabled += "com.github.tototoshi.play2.json4s.native.Json4sModule"
 ```
 
-To use json4s-jackson
 ```scala
-import com.github.tototoshi.play2.json4s.jackson._
-```
+package controllers
 
-All you have to do is to mix-in Json4s trait.
+import javax.inject.{ Inject, Singleton }
 
-```scala
-object Application extends Controller with Json4s {
-```
-
-Json4s provides
-- Body parser for Json4s
-- Implicit objects to create response objects with json Body
-
-See below
-
-```scala
+import com.github.tototoshi.play2.json4s.Json4s
+import models.Person
 import org.json4s._
-import org.json4s.native.JsonMethods._
-// or import org.json4s.jackson.JsonMethods._
-case class Person(id: Long, name: String, age: Int)
+import play.api.mvc.{ Controller, Action }
 
-object Application extends Controller with Json4s {
+@Singleton
+class HomeController @Inject() (json4s: Json4s) extends Controller {
 
+  import json4s._
   implicit val formats = DefaultFormats
 
   def get = Action { implicit request =>
@@ -107,37 +99,42 @@ This add the features as the following
 
 
 ```scala
-(some imports as usual ...)
+class PlayModuleSpec extends FunSpec with ShouldMatchers {
 
-import org.json4s._
-import org.json4s.native.JsonMethods._
-import com.github.tototoshi.play2.json4s.test.native.Helpers._
+  val configuration = Configuration.empty
 
-class ApplicationSpec extends Specification {
+  val json4s = new Json4s(configuration)
+  import json4s._
 
-  "Json4sPlayModule" should {
+  describe("Json4sPlayModule") {
 
-    "allow you to use json4s-native value as response" in {
-      val res = Application.get(FakeRequest())
-      contentType(res) must beSome("application/json")
-      contentAsJson4s(res) must_== (JObject(List(("id",JInt(1)), ("name",JString("ぱみゅぱみゅ")), ("age",JInt(20)))))
+    describe("With controllers") {
+
+      it("allow you to use json4s-jackson value as response") {
+        val app = new TestApplication(json4s)
+        val res = app.get(FakeRequest("GET", ""))
+        contentType(res) should be(Some("application/json"))
+        contentAsJson4s(res) should be(JObject(List(("id", JInt(1)), ("name", JString("ぱみゅぱみゅ")), ("age", JInt(20)))))
+      }
+
+      it("accept json4s-jackson request") {
+        val app = new TestApplication(json4s)
+        val res = app.post(FakeRequest().withJson4sBody(parse("""{"id":1,"name":"ぱみゅぱみゅ","age":20}""")))
+        contentAsString(res) should be("ぱみゅぱみゅ")
+      }
+
     }
-
-    "accept native json request" in {
-      val fakeRequest = FakeRequest().withJson4sBody(parse("""{"id":1,"name":"ぱみゅぱみゅ","age":20}"""))
-      val res = Application.post(fakeRequest)
-      contentAsString(res) must beEqualTo ("ぱみゅぱみゅ")
-    }
-
   }
-
 }
 ```
 
 ## ChangeLog
 
+### 0.5.0
+ - Support Play 2.5 and DI
+
 ### 0.4.2
-- Updated json4s version to 3.3.0
+ - Updated json4s version to 3.3.0
 
 ### 0.4.1
  - Re-published 0.4.0 because of invalid sha1 problem of sonatype
