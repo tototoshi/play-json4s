@@ -29,6 +29,17 @@ val baseSettings = Seq(
   resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases"
 )
 
+lazy val api = Project(
+  id = "play-json4s-api",
+  base = file("api"),
+  settings = baseSettings ++ publishingSettings ++ Seq(
+    name := "play-json4s-api",
+    libraryDependencies ++= playDependencies ++ Seq(
+      json4sCore
+    )
+  )
+)
+
 lazy val core = Project(
   id = "play-json4s-core",
   base = file("core"),
@@ -38,7 +49,7 @@ lazy val core = Project(
       json4sCore
     )
   )
-)
+).dependsOn(api)
 
 lazy val testCore = Project(
   id = "play-json4s-test-core",
@@ -90,7 +101,7 @@ lazy val native = Project(
       playWS % "test"
     )
   )
-).dependsOn(core, testNative % "test", testHelper % "test")
+).dependsOn(core, api, testNative % "test", testHelper % "test")
 
 lazy val jackson = Project(
   id = "play-json4s-jackson",

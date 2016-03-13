@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject.{ Inject, Singleton }
 
-import com.github.tototoshi.play2.json4s.jackson.Json4s
+import com.github.tototoshi.play2.json4s.Json4s
 import models.Person
 import org.json4s._
 import play.api.mvc.{ Controller, Action }

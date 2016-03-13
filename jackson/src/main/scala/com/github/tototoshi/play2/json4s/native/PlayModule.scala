@@ -28,6 +28,6 @@ class Json4s @Inject() (configuration: Configuration)
 
 class Json4sModule extends Module {
   override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] = Seq(
-    bind[Json4s].toSelf
+    bind[com.github.tototoshi.play2.json4s.Json4s].to[Json4s]
   )
 }

@@ -18,6 +18,7 @@ package com.github.tototoshi.play2.json4s.core
 
 import akka.stream.scaladsl.Sink
 import akka.util.ByteString
+import com.github.tototoshi.play2.json4s.Json4s
 import org.json4s.{ JValue => Json4sJValue, _ }
 import play.api._
 import play.api.http._
@@ -28,7 +29,7 @@ import scala.concurrent.Future
 import scala.language.reflectiveCalls
 import scala.util.control.NonFatal
 
-class Json4sParser[T](configuration: Configuration, methods: JsonMethods[T]) {
+class Json4sParser[T](configuration: Configuration, methods: JsonMethods[T]) extends Json4s {
 
   import methods._
 
@@ -50,10 +51,6 @@ class Json4sParser[T](configuration: Configuration, methods: JsonMethods[T]) {
     }
     maxMemoryBuffer.orElse(textMaxLength).map(_.toInt).getOrElse(102400)
   }
-
-  final type ParseErrorHandler = (RequestHeader, ByteString, Throwable) => Future[Result]
-
-  protected def defaultParseErrorMessage = "Invalid Json"
 
   protected def defaultParseErrorHandler: ParseErrorHandler = {
     (header, _, _) => internal.BodyParsers.parse.createBadResult(defaultParseErrorMessage)(header)
