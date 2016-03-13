@@ -16,19 +16,23 @@
 
 package com.github.tototoshi.play2.json4s.core
 
+import akka.stream.scaladsl.Sink
+import akka.util.ByteString
+import org.json4s.{JValue => Json4sJValue, _}
 import play.api._
 import play.api.http._
+import play.api.libs.streams.Accumulator
 import play.api.mvc._
-import play.api.libs.iteratee._
-import org.json4s._
-import org.json4s.{JValue => Json4sJValue}
-import scala.language.reflectiveCalls
+
 import scala.concurrent.Future
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import scala.language.reflectiveCalls
+import scala.util.control.NonFatal
 
 class Json4sParser[T] (configuration: Configuration, methods: JsonMethods[T]) {
 
   import methods._
+
+  val logger = Logger(classOf[Json4sParser[T]])
 
   implicit def writeableOf_NativeJValue(implicit codec: Codec): Writeable[Json4sJValue] = {
     Writeable((jval: Json4sJValue) => codec.encode(compact(render(jval))))
@@ -38,69 +42,63 @@ class Json4sParser[T] (configuration: Configuration, methods: JsonMethods[T]) {
     ContentTypeOf(Some(ContentTypes.JSON))
   }
 
-  def DEFAULT_MAX_TEXT_LENGTH: Int =
-    configuration.getBytes("parsers.text.maxLength").map(_.toInt).getOrElse(1024 * 100)
-
-  final type ParseErrorHandler = (RequestHeader, Array[Byte], Throwable) => Future[Result]
-
-  protected def defaultParseErrorMessage = "Invalid Json"
-  protected def defaultParseErrorHandler: ParseErrorHandler = {
-    (header, _, _) => createBadResult(defaultParseErrorMessage)(header)
+  def DEFAULT_MAX_TEXT_LENGTH: Int = {
+    val textMaxLength = configuration.getBytes("parsers.text.maxLength")
+    val maxMemoryBuffer = configuration.getBytes("play.http.parser.maxMemoryBuffer")
+    if (textMaxLength.nonEmpty && maxMemoryBuffer.isEmpty) {
+      logger.warn("Configuration 'parsers.text.maxLength is deprecated. Use play.http.parser.maxMemoryBuffer")
+    }
+    maxMemoryBuffer.orElse(textMaxLength).map(_.toInt).getOrElse(102400)
   }
 
-  def defaultTolerantBodyParser[A](name: String, maxLength: Int)(parser: (RequestHeader, Array[Byte]) => A): BodyParser[A] =
-    tolerantBodyParser[A](name, maxLength)(parser)(defaultParseErrorHandler)
+  final type ParseErrorHandler = (RequestHeader, ByteString, Throwable) => Future[Result]
 
-  def tolerantBodyParser[A](name: String, maxLength: Int)(parser: (RequestHeader, Array[Byte]) => A)(parseErrorHandler: ParseErrorHandler): BodyParser[A] =
-    BodyParser(name + ", maxLength=" + maxLength) {
-      request =>
-        import scala.util.control.Exception._
+  protected def defaultParseErrorMessage = "Invalid Json"
 
-        val bodyParser: Iteratee[Array[Byte], Either[Result, Either[Future[Result], A]]] =
-          Traversable.takeUpTo[Array[Byte]](maxLength).transform(
-            Iteratee.consume[Array[Byte]]().map {
-              bytes =>
-                allCatch[A].either {
-                  parser(request, bytes)
-                }.left.map {
-                  e => parseErrorHandler(request, bytes, e)
-                }
-            }
-          ).flatMap(Iteratee.eofOrElse(Results.EntityTooLarge))
+  protected def defaultParseErrorHandler: ParseErrorHandler = {
+    (header, _, _) => internal.BodyParsers.parse.createBadResult(defaultParseErrorMessage)(header)
+  }
 
-        bodyParser.mapM {
-          case Left(tooLarge) => Future.successful(Left(tooLarge))
-          case Right(Left(badResult)) => badResult.map(Left.apply)
-          case Right(Right(body)) => Future.successful(Right(body))
+  def defaultTolerantBodyParser[A](name: String, maxLength: Int)(parser: (RequestHeader, ByteString) => A): BodyParser[A] =
+    tolerantBodyParser[A](name, maxLength, "Invalid json")(parser)(defaultParseErrorHandler)
+
+  private def tolerantBodyParser[A](name: String, maxLength: Long, errorMessage: String)(parser: (RequestHeader, ByteString) => A)(errorHandler: ParseErrorHandler): BodyParser[A] =
+    BodyParser(name + ", maxLength=" + maxLength) { request =>
+      import play.api.libs.iteratee.Execution.Implicits.trampoline
+
+      internal.BodyParsers.parse.enforceMaxLength(request, maxLength, Accumulator(
+        Sink.fold[ByteString, ByteString](ByteString.empty)((state, bs) => state ++ bs)
+      ) mapFuture { bytes =>
+        try {
+          Future.successful(Right(parser(request, bytes)))
+        } catch {
+          case NonFatal(e) =>
+            logger.debug(errorMessage, e)
+            errorHandler(request, bytes, e).map(Left(_))
         }
+      })
     }
 
-  private[this] val defaultParser: (RequestHeader, Array[Byte]) => Json4sJValue = {
+  private[this] val defaultParser: (RequestHeader, ByteString) => Json4sJValue = {
     (request, bytes) =>
-      parse(new String(bytes, request.charset.getOrElse("utf-8")))
+      parse(bytes.iterator.asInputStream)
   }
 
   def tolerantJson(maxLength: Int): BodyParser[Json4sJValue] =
     defaultTolerantBodyParser[Json4sJValue]("json", maxLength)(defaultParser)
 
   def tolerantJsonWithErrorHandler(maxLength: Int, errorHandler: ParseErrorHandler): BodyParser[Json4sJValue] =
-    tolerantBodyParser[Json4sJValue]("json", maxLength)(defaultParser)(errorHandler)
+    tolerantBodyParser[Json4sJValue]("json", maxLength, "Invalid json")(defaultParser)(errorHandler)
 
   /**
    * Parse the body as Json without checking the Content-Type.
    */
   def tolerantJson: BodyParser[Json4sJValue] = tolerantJson(DEFAULT_MAX_TEXT_LENGTH)
 
-  private def createBadResult(msg: String): RequestHeader => Future[Result] = {
-    request =>
-      Play.maybeApplication.map(_.global.onBadRequest(request, "Expecting json body"))
-        .getOrElse(Future.successful(Results.BadRequest))
-  }
-
   def jsonWithErrorHandler(maxLength: Int)(errorHandler: ParseErrorHandler): BodyParser[Json4sJValue] = BodyParsers.parse.when(
     _.contentType.exists(m => m.equalsIgnoreCase("text/json") || m.equalsIgnoreCase("application/json")),
     tolerantJsonWithErrorHandler(maxLength, errorHandler),
-    createBadResult("Expecting text/json or application/json body")
+    internal.BodyParsers.parse.createBadResult("Expecting text/json or application/json body")
   )
 
   def json(maxLength: Int): BodyParser[Json4sJValue] =
