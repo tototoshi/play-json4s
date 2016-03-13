@@ -24,7 +24,6 @@ val baseSettings = Seq(
   organization := "com.github.tototoshi",
   version := _version,
   scalaVersion := "2.11.8",
-  crossScalaVersions := scalaVersion.value :: "2.10.4" :: Nil,
   scalacOptions ++= Seq("-feature", "-deprecation"),
   resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases"
 )
