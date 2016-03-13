@@ -19,7 +19,7 @@ import scala.language.reflectiveCalls
 /**
  * Default body parsers.
  */
-trait BodyParsers {
+private[core] trait BodyParsers {
 
   /**
    * Default body parsers.
