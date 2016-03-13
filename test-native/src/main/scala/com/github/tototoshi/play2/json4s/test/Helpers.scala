@@ -15,8 +15,9 @@
  */
 package com.github.tototoshi.play2.json4s.test.native
 
-import scala.text.Document
 import com.github.tototoshi.play2.json4s.test.core.{ Helpers => CoreHelpers }
+
+import scala.text.Document
 
 object Helpers extends CoreHelpers[Document](org.json4s.native.JsonMethods)
 

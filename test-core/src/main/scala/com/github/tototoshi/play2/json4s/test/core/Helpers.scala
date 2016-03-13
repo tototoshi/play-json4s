@@ -15,13 +15,13 @@
  */
 package com.github.tototoshi.play2.json4s.test.core
 
-import play.api.mvc.{ Result, Request }
-import play.twirl.api.Content
-import play.api.test._
-import org.json4s._
-import com.github.tototoshi.play2.json4s.core._
-import scala.concurrent.Future
 import akka.util.Timeout
+import org.json4s._
+import play.api.mvc.{ Request, Result }
+import play.api.test._
+import play.twirl.api.Content
+
+import scala.concurrent.Future
 
 class Helpers[T](methods: JsonMethods[T]) {
 

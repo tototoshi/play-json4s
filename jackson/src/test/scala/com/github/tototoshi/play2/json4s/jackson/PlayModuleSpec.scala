@@ -77,8 +77,6 @@ class PlayModuleSpec extends FunSpec with ShouldMatchers with JsonTestServer {
     describe ("With WS") {
 
       it ("should enable you to use json4s objects as request body") {
-        import play.api.libs.ws.WS
-
         import scala.concurrent._
         import scala.concurrent.duration._
         import scala.language.postfixOps

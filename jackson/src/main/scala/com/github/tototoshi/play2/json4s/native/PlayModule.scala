@@ -16,10 +16,10 @@
 
 package com.github.tototoshi.play2.json4s.jackson
 
-import org.json4s.{ JValue => Json4sJValue }
 import com.github.tototoshi.play2.json4s.core._
-import play.api.{ Environment, Configuration }
-import play.api.inject.{ Module, Binding }
+import org.json4s.{ JValue => Json4sJValue }
+import play.api.inject.{ Binding, Module }
+import play.api.{ Configuration, Environment }
 
 class Json4s(configuration: Configuration)
   extends Json4sParser[Json4sJValue](configuration, org.json4s.jackson.JsonMethods)
