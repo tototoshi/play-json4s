@@ -57,7 +57,7 @@ class Json4sParser[T](configuration: Configuration, methods: JsonMethods[T]) ext
   }
 
   def defaultTolerantBodyParser[A](name: String, maxLength: Int)(parser: (RequestHeader, ByteString) => A): BodyParser[A] =
-    tolerantBodyParser[A](name, maxLength, "Invalid json")(parser)(defaultParseErrorHandler)
+    tolerantBodyParser[A](name, maxLength, defaultParseErrorMessage)(parser)(defaultParseErrorHandler)
 
   private def tolerantBodyParser[A](name: String, maxLength: Long, errorMessage: String)(parser: (RequestHeader, ByteString) => A)(errorHandler: ParseErrorHandler): BodyParser[A] =
     BodyParser(name + ", maxLength=" + maxLength) { request =>
@@ -85,7 +85,7 @@ class Json4sParser[T](configuration: Configuration, methods: JsonMethods[T]) ext
     defaultTolerantBodyParser[Json4sJValue]("json", maxLength)(defaultParser)
 
   def tolerantJsonWithErrorHandler(maxLength: Int, errorHandler: ParseErrorHandler): BodyParser[Json4sJValue] =
-    tolerantBodyParser[Json4sJValue]("json", maxLength, "Invalid json")(defaultParser)(errorHandler)
+    tolerantBodyParser[Json4sJValue]("json", maxLength, defaultParseErrorMessage)(defaultParser)(errorHandler)
 
   /**
    * Parse the body as Json without checking the Content-Type.
