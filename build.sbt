@@ -9,15 +9,9 @@ val scalatest = "org.scalatest" %% "scalatest" % "2.2.2"
 
 val playApi = "com.typesafe.play" %% "play" % _playVersion
 val playTest = "com.typesafe.play" %% "play-test" % _playVersion
-val playWS = "com.typesafe.play" %% "play-ws" % _playVersion % "test"
+val playWS = "com.typesafe.play" %% "play-ws" % _playVersion
 
 val playDependencies = Seq(playApi % "provided", playTest % "test")
-
-val unfilteredVersion = "0.8.0"
-val unfilteredFilter = "net.databinder" %% "unfiltered-filter" % unfilteredVersion
-val unfilteredJetty =  "net.databinder" %% "unfiltered-jetty" % unfilteredVersion
-val unfilteredDependencies = Seq(unfilteredFilter, unfilteredJetty)
-val unfilteredDependenciesForTest = Seq(unfilteredFilter % "test", unfilteredJetty % "test")
 
 val publishingSettings = Seq(
   publishMavenStyle := true,
@@ -93,7 +87,7 @@ lazy val native = Project(
     libraryDependencies ++= playDependencies ++ Seq(
       json4sNative,
       scalatest % "test",
-      playWS
+      playWS % "test"
     )
   )
 ).dependsOn(core, testNative % "test", testHelper % "test")
@@ -106,7 +100,7 @@ lazy val jackson = Project(
     libraryDependencies ++= playDependencies ++ Seq(
       json4sJackson,
       scalatest % "test",
-      playWS
+      playWS % "test"
     )
   )
 ).dependsOn(core, testJackson % "test", testHelper % "test")
@@ -116,9 +110,9 @@ lazy val testHelper = Project(
   base = file("test-helper"),
   settings = baseSettings ++ Seq(
     name := "play-json4s-test-helper",
-    libraryDependencies ++= unfilteredDependencies
+    libraryDependencies ++= Seq(playApi, playTest, playWS)
   )
-)
+).dependsOn(core)
 
 lazy val playJson4s = Project(
   id = "play-json4s",
@@ -127,7 +121,8 @@ lazy val playJson4s = Project(
     name := "json4s",
     publishArtifact := false,
     publish := {},
-    publishLocal := {}
+    publishLocal := {},
+    parallelExecution in Test := false
   )
 ).aggregate(native, jackson, core, testCore, testNative, testJackson)
 

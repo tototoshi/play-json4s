@@ -16,18 +16,16 @@
 
 package com.github.tototoshi.play2.json4s.native
 
-import play.api._
-import play.api.mvc._
-import play.api.test._
-import play.api.test.Helpers._
-
+import com.github.tototoshi.play2.json4s.test.JsonTestServer
+import com.github.tototoshi.play2.json4s.test.native.Helpers._
 import org.json4s._
 import org.json4s.native.JsonMethods._
-import com.github.tototoshi.play2.json4s.test.native.Helpers._
-import com.github.tototoshi.play2.json4s.test.MockServer
-
-import org.scalatest.FunSpec
-import org.scalatest.matchers._
+import org.scalatest.{FunSpec, ShouldMatchers}
+import play.api._
+import play.api.libs.ws.WSClient
+import play.api.mvc._
+import play.api.test.Helpers._
+import play.api.test._
 
 case class Person(id: Long, name: String, age: Int)
 
@@ -48,7 +46,7 @@ class TestApplication(json4s: Json4s) extends Controller {
 }
 
 
-class PlayModuleSpec extends FunSpec with ShouldMatchers with MockServer {
+class PlayModuleSpec extends FunSpec with ShouldMatchers with JsonTestServer {
 
   val configuration = Configuration.empty
 
@@ -78,32 +76,25 @@ class PlayModuleSpec extends FunSpec with ShouldMatchers with MockServer {
     describe ("With WS") {
 
       it ("should enable you to use json4s objects as request body") {
-        import unfiltered.filter._
-        import unfiltered.request._
-        import unfiltered.response._
-        import play.api.libs.ws.WS
         import scala.concurrent._
         import scala.concurrent.duration._
         import scala.language.postfixOps
-        import org.apache.commons.io.IOUtils
 
         implicit val formats = DefaultFormats
 
-        val plan = Planify {
-          case request @ Path("/foo") => {
-            val in = request.inputStream
-            try {
-              ResponseString(IOUtils.toString(in))
-            } finally {
-              IOUtils.closeQuietly(in)
-            }
+        val port = 19002
+
+        def withSimpleServer[T](block: WSClient => T): T = withServer (port){
+          case (method, path) => Action(json4s.json) { request =>
+            val person = request.body.extract[Person]
+            play.api.mvc.Results.Ok(Extraction.decompose(person))
           }
-        }
-        withMockServer(plan) { port =>
-          implicit val app = play.api.test.FakeApplication()
+        }(block)
+
+        withSimpleServer { wsClient =>
           val person = Person(1, "ぱみゅぱみゅ", 20)
           val res = Await.result(
-            WS.url("http://localhost:" + port + "/foo")
+            wsClient.url("http://localhost:" + port)
               .post(Extraction.decompose(person)),
             5 seconds
           )
