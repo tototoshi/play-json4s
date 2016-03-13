@@ -29,7 +29,7 @@ val baseSettings = Seq(
 )
 
 lazy val api = Project(
-  id = "play-json4s-api",
+  id = "api",
   base = file("api"),
   settings = baseSettings ++ publishingSettings ++ Seq(
     name := "play-json4s-api",
@@ -40,7 +40,7 @@ lazy val api = Project(
 )
 
 lazy val core = Project(
-  id = "play-json4s-core",
+  id = "core",
   base = file("core"),
   settings = baseSettings ++ publishingSettings ++ Seq(
     name := "play-json4s-core",
@@ -51,7 +51,7 @@ lazy val core = Project(
 ).dependsOn(api)
 
 lazy val testCore = Project(
-  id = "play-json4s-test-core",
+  id = "test-core",
   base = file("test-core"),
   settings = baseSettings ++ publishingSettings ++ Seq(
     name := "play-json4s-test-core",
@@ -64,7 +64,7 @@ lazy val testCore = Project(
 ).dependsOn(core)
 
 lazy val testNative = Project(
-  id = "play-json4s-test-native",
+  id = "test-native",
   base = file("test-native"),
   settings = baseSettings ++ publishingSettings ++ Seq(
     name := "play-json4s-test-native",
@@ -77,7 +77,7 @@ lazy val testNative = Project(
 ).dependsOn(core, testCore)
 
 lazy val testJackson = Project(
-  id = "play-json4s-test-jackson",
+  id = "test-jackson",
   base = file("test-jackson"),
   settings = baseSettings ++ publishingSettings ++ Seq(
     name := "play-json4s-test-jackson",
@@ -90,7 +90,7 @@ lazy val testJackson = Project(
 ).dependsOn(core, testCore)
 
 lazy val native = Project(
-  id = "play-json4s-native",
+  id = "native",
   base = file("native"),
   settings = baseSettings ++ publishingSettings ++ Seq(
     name := "play-json4s-native",
@@ -103,7 +103,7 @@ lazy val native = Project(
 ).dependsOn(core, api, testNative % "test", testHelper % "test")
 
 lazy val jackson = Project(
-  id = "play-json4s-jackson",
+  id = "jackson",
   base = file("jackson"),
   settings = baseSettings ++ publishingSettings ++ Seq(
     name := "play-json4s-jackson",
@@ -116,7 +116,7 @@ lazy val jackson = Project(
 ).dependsOn(core, testJackson % "test", testHelper % "test")
 
 lazy val testHelper = Project(
-  id = "play-json4s-test-helper",
+  id = "test-helper",
   base = file("test-helper"),
   settings = baseSettings ++ Seq(
     name := "play-json4s-test-helper",
@@ -125,7 +125,7 @@ lazy val testHelper = Project(
 ).dependsOn(core)
 
 lazy val playJson4s = Project(
-  id = "play-json4s",
+  id = "root",
   base = file("."),
   settings = baseSettings ++ Seq(
     name := "json4s",
@@ -137,7 +137,7 @@ lazy val playJson4s = Project(
 ).aggregate(native, jackson, core, testCore, testNative, testJackson)
 
 lazy val example = Project(
-  id = "play-json4s-example",
+  id = "example",
   base = file("example")
 ).enablePlugins(PlayScala)
 .settings(
