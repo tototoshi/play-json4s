@@ -18,7 +18,7 @@ package com.github.tototoshi.play2.json4s.core
 
 import akka.stream.scaladsl.Sink
 import akka.util.ByteString
-import org.json4s.{JValue => Json4sJValue, _}
+import org.json4s.{ JValue => Json4sJValue, _ }
 import play.api._
 import play.api.http._
 import play.api.libs.streams.Accumulator
@@ -28,7 +28,7 @@ import scala.concurrent.Future
 import scala.language.reflectiveCalls
 import scala.util.control.NonFatal
 
-class Json4sParser[T] (configuration: Configuration, methods: JsonMethods[T]) {
+class Json4sParser[T](configuration: Configuration, methods: JsonMethods[T]) {
 
   import methods._
 
@@ -69,14 +69,14 @@ class Json4sParser[T] (configuration: Configuration, methods: JsonMethods[T]) {
       internal.BodyParsers.parse.enforceMaxLength(request, maxLength, Accumulator(
         Sink.fold[ByteString, ByteString](ByteString.empty)((state, bs) => state ++ bs)
       ) mapFuture { bytes =>
-        try {
-          Future.successful(Right(parser(request, bytes)))
-        } catch {
-          case NonFatal(e) =>
-            logger.debug(errorMessage, e)
-            errorHandler(request, bytes, e).map(Left(_))
-        }
-      })
+          try {
+            Future.successful(Right(parser(request, bytes)))
+          } catch {
+            case NonFatal(e) =>
+              logger.debug(errorMessage, e)
+              errorHandler(request, bytes, e).map(Left(_))
+          }
+        })
     }
 
   private[this] val defaultParser: (RequestHeader, ByteString) => Json4sJValue = {

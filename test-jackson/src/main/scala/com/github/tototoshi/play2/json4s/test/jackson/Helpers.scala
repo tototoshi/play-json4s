@@ -20,4 +20,3 @@ import com.github.tototoshi.play2.json4s.test.core.{ Helpers => CoreHelpers }
 
 object Helpers extends CoreHelpers[JValue](org.json4s.jackson.JsonMethods)
 
-

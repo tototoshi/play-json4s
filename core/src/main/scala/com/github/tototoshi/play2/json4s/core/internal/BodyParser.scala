@@ -9,21 +9,21 @@ import akka.stream.stage._
 import akka.util.ByteString
 import play.api._
 import play.api.http.Status._
-import play.api.http.{HttpConfiguration, LazyHttpErrorHandler}
+import play.api.http.{ HttpConfiguration, LazyHttpErrorHandler }
 import play.api.libs.streams.Accumulator
 import play.api.mvc._
 
-import scala.concurrent.{Future, Promise}
+import scala.concurrent.{ Future, Promise }
 import scala.language.reflectiveCalls
 
 /**
-  * Default body parsers.
-  */
+ * Default body parsers.
+ */
 trait BodyParsers {
 
   /**
-    * Default body parsers.
-    */
+   * Default body parsers.
+   */
   object parse {
 
     private[core] def createBadResult(msg: String, statusCode: Int = BAD_REQUEST): RequestHeader => Future[Result] = { request =>
@@ -31,8 +31,8 @@ trait BodyParsers {
     }
 
     /**
-      * Enforce the max length on the stream consumed by the given accumulator.
-      */
+     * Enforce the max length on the stream consumed by the given accumulator.
+     */
     private[core] def enforceMaxLength[A](request: RequestHeader, maxLength: Long, accumulator: Accumulator[ByteString, Either[Result, A]]): Accumulator[ByteString, Either[Result, A]] = {
       val takeUpToFlow = Flow.fromGraph(new BodyParsers.TakeUpTo(maxLength))
       Accumulator(takeUpToFlow.toMat(accumulator.toSink) { (statusFuture, resultFuture) =>
@@ -52,8 +52,8 @@ trait BodyParsers {
 }
 
 /**
-  * Defaults BodyParsers.
-  */
+ * Defaults BodyParsers.
+ */
 object BodyParsers extends BodyParsers {
   private val logger = Logger(this.getClass)
 
