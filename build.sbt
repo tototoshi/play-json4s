@@ -126,6 +126,15 @@ lazy val playJson4s = Project(
   )
 ).aggregate(native, jackson, core, testCore, testNative, testJackson)
 
+lazy val example = Project(
+  id = "play-json4s-example",
+  base = file("example")
+).enablePlugins(PlayScala)
+.settings(
+  scalaVersion := "2.11.8"
+)
+.dependsOn(jackson)
+
 def _publishTo(v: String) = {
   val nexus = "https://oss.sonatype.org/"
   if (v.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "content/repositories/snapshots")
