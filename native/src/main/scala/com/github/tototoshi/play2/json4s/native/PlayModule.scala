@@ -16,11 +16,13 @@
 
 package com.github.tototoshi.play2.json4s.native
 
+import javax.inject.Inject
+
 import com.github.tototoshi.play2.json4s.core._
 import play.api.inject.{ Binding, Module }
 import play.api.{ Configuration, Environment }
 
-class Json4s(configuration: Configuration)
+class Json4s @Inject() (configuration: Configuration)
   extends Json4sParser[scala.text.Document](configuration, org.json4s.native.JsonMethods)
 
 class Json4sModule extends Module {
