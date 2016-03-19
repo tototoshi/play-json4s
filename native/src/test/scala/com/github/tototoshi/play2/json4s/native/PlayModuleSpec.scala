@@ -16,16 +16,15 @@
 
 package com.github.tototoshi.play2.json4s.native
 
-import com.github.tototoshi.play2.json4s.test.JsonTestServer
 import com.github.tototoshi.play2.json4s.test.native.Helpers._
 import org.json4s._
 import org.json4s.native.JsonMethods._
 import org.scalatest.{ FunSpec, ShouldMatchers }
 import play.api._
-import play.api.libs.ws.WSClient
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
+import play.core.server.Server
 
 case class Person(id: Long, name: String, age: Int)
 
@@ -45,7 +44,7 @@ class TestApplication(json4s: Json4s) extends Controller {
 
 }
 
-class PlayModuleSpec extends FunSpec with ShouldMatchers with JsonTestServer {
+class PlayModuleSpec extends FunSpec with ShouldMatchers {
 
   val configuration = Configuration.empty
 
@@ -81,27 +80,25 @@ class PlayModuleSpec extends FunSpec with ShouldMatchers with JsonTestServer {
 
         implicit val formats = DefaultFormats
 
-        val port = 19002
-
-        def withSimpleServer[T](block: WSClient => T): T = withServer(port) {
-          case (method, path) => Action(json4s.json) { request =>
+        Server.withRouter() {
+          case _ => Action(json4s.json) { request =>
             val person = request.body.extract[Person]
             play.api.mvc.Results.Ok(Extraction.decompose(person))
           }
-        }(block)
-
-        withSimpleServer { wsClient =>
-          val person = Person(1, "ぱみゅぱみゅ", 20)
-          val res = Await.result(
-            wsClient.url("http://localhost:" + port)
-              .post(Extraction.decompose(person)),
-            5 seconds
-          )
-          val chars = person.name.toCharArray
-          val name = (0 until chars.length).map { i =>
-            "\\u%04x".format(Character.codePointAt(chars, i))
-          }.mkString
-          res.body should be(s"""{"id":1,"name":"${name}","age":20}""")
+        } { implicit port =>
+          WsTestClient.withClient { client =>
+            val person = Person(1, "ぱみゅぱみゅ", 20)
+            val res = Await.result(
+              client.url("http://localhost:" + port)
+                .post(Extraction.decompose(person)),
+              5 seconds
+            )
+            val chars = person.name.toCharArray
+            val name = (0 until chars.length).map { i =>
+              "\\u%04x".format(Character.codePointAt(chars, i))
+            }.mkString
+            res.body should be(s"""{"id":1,"name":"${name}","age":20}""")
+          }
         }
       }
 

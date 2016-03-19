@@ -100,7 +100,7 @@ lazy val native = Project(
       playWS % "test"
     )
   )
-).dependsOn(core, api, testNative % "test", testHelper % "test")
+).dependsOn(core, api, testNative % "test")
 
 lazy val jackson = Project(
   id = "jackson",
@@ -113,16 +113,7 @@ lazy val jackson = Project(
       playWS % "test"
     )
   )
-).dependsOn(core, testJackson % "test", testHelper % "test")
-
-lazy val testHelper = Project(
-  id = "test-helper",
-  base = file("test-helper"),
-  settings = baseSettings ++ Seq(
-    name := "play-json4s-test-helper",
-    libraryDependencies ++= Seq(playApi, playTest, playWS)
-  )
-).dependsOn(core)
+).dependsOn(core, testJackson % "test")
 
 lazy val playJson4s = Project(
   id = "root",
