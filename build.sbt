@@ -125,7 +125,7 @@ lazy val playJson4s = Project(
     publishLocal := {},
     parallelExecution in Test := false
   )
-).aggregate(native, jackson, core, testCore, testNative, testJackson)
+).aggregate(api, native, jackson, core, testCore, testNative, testJackson)
 
 lazy val example = Project(
   id = "example",
