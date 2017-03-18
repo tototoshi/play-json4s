@@ -134,6 +134,12 @@ class PlayModuleSpec extends FunSpec with ShouldMatchers {
 
 ## ChangeLog
 
+### 0.7.0
+ - Json4s 3.5.1
+
+### 0.6.0
+ - Json4s 3.4.2
+
 ### 0.5.0
  - Support Play 2.5 and DI
 
