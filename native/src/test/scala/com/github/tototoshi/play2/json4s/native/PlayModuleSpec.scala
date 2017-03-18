@@ -94,10 +94,7 @@ class PlayModuleSpec extends FunSpec with ShouldMatchers {
               5 seconds
             )
             val chars = person.name.toCharArray
-            val name = (0 until chars.length).map { i =>
-              "\\u%04x".format(Character.codePointAt(chars, i))
-            }.mkString
-            res.body should be(s"""{"id":1,"name":"${name}","age":20}""")
+            res.body should be(s"""{"id":1,"name":"ぱみゅぱみゅ","age":20}""")
           }
         }
       }
