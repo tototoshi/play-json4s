@@ -75,12 +75,7 @@ class HomeController @Inject() (json4s: Json4s) extends Controller {
 
 ### With WS
 
-You can use json4s objects as request body.
-
-```scala
-WS.url("http://......")
-  .post(Extraction.decompose(Person(1, "pamyupamyu", 20))),
-```
+[play-ws-standalone-json4s](https://github.com/tototoshi/play-ws-standalone-json4s)
 
 ### With tests
 
