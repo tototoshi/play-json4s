@@ -16,90 +16,109 @@
 
 package com.github.tototoshi.play2.json4s.core
 
-import akka.stream.scaladsl.Sink
+import akka.stream.Materializer
 import akka.util.ByteString
-import com.github.tototoshi.play2.json4s.Json4s
-import org.json4s.{ JValue => Json4sJValue, _ }
-import play.api._
+import com.github.tototoshi.play2.json4s.{Json4s, Json4sImplicits}
+import org.json4s.{Formats, JValue, JsonMethods, Reader}
 import play.api.http._
-import play.api.libs.streams.Accumulator
+import play.api.libs.Files.TemporaryFileCreator
 import play.api.mvc._
 
 import scala.concurrent.Future
-import scala.language.reflectiveCalls
-import scala.util.control.NonFatal
 
-class Json4sParser[T](configuration: Configuration, methods: JsonMethods[T]) extends Json4s {
+abstract class Json4sParser[T](
+    methods: JsonMethods[T],
+    val config: ParserConfiguration,
+    val errorHandler: HttpErrorHandler,
+    val materializer: Materializer,
+    val temporaryFileCreator: TemporaryFileCreator)
+  extends Json4s {
 
   import methods._
+  import BodyParsers.utils._
+  import play.api.http.Status._
 
-  val logger = Logger(classOf[Json4sParser[T]])
+  val implicits: Json4sImplicits = new Json4sImplicits {
 
-  implicit def writeableOf_NativeJValue(implicit codec: Codec): Writeable[Json4sJValue] = {
-    Writeable((jval: Json4sJValue) => codec.encode(compact(render(jval))))
-  }
-
-  implicit def contentTypeOf_JsValue(implicit codec: Codec): ContentTypeOf[Json4sJValue] = {
-    ContentTypeOf(Some(ContentTypes.JSON))
-  }
-
-  def DEFAULT_MAX_TEXT_LENGTH: Int = {
-    val textMaxLength = configuration.getBytes("parsers.text.maxLength")
-    val maxMemoryBuffer = configuration.getBytes("play.http.parser.maxMemoryBuffer")
-    if (textMaxLength.nonEmpty && maxMemoryBuffer.isEmpty) {
-      logger.warn("Configuration 'parsers.text.maxLength is deprecated. Use play.http.parser.maxMemoryBuffer")
+    implicit def writeableOf_JValue(implicit codec: Codec): Writeable[JValue] = {
+      Writeable((jval: JValue) => codec.encode(compact(render(jval))))
     }
-    maxMemoryBuffer.orElse(textMaxLength).map(_.toInt).getOrElse(102400)
+
+    implicit def contentTypeOf_JValue(implicit codec: Codec): ContentTypeOf[JValue] = {
+      ContentTypeOf(Some(ContentTypes.JSON))
+    }
+
   }
 
-  protected def defaultParseErrorHandler: ParseErrorHandler = {
-    (header, _, _) => internal.BodyParsers.parse.createBadResult(defaultParseErrorMessage)(header)
+  private class InternalPlayBodyParser(
+      val config: ParserConfiguration,
+      val errorHandler: HttpErrorHandler,
+      val materializer: Materializer,
+      val temporaryFileCreator: TemporaryFileCreator)
+    extends PlayBodyParsers {
+
+    def publicTolerantBodyParser[A](
+        name: String,
+        maxLength: Long,
+        errorMessage: String
+      )(parser: (RequestHeader, ByteString) => A
+      ): BodyParser[A] = tolerantBodyParser(name, maxLength, errorMessage)(parser)
+
+    def publicCreateBadResult(msg: String, statusCode: Int = BAD_REQUEST): RequestHeader => Future[Result] = {
+      super.createBadResult(msg, statusCode)
+    }
   }
 
-  def defaultTolerantBodyParser[A](name: String, maxLength: Int)(parser: (RequestHeader, ByteString) => A): BodyParser[A] =
-    tolerantBodyParser[A](name, maxLength, defaultParseErrorMessage)(parser)(defaultParseErrorHandler)
+  private val internalParser: InternalPlayBodyParser =
+    new InternalPlayBodyParser(config, errorHandler, materializer, temporaryFileCreator)
 
-  private def tolerantBodyParser[A](name: String, maxLength: Long, errorMessage: String)(parser: (RequestHeader, ByteString) => A)(errorHandler: ParseErrorHandler): BodyParser[A] =
-    BodyParser(name + ", maxLength=" + maxLength) { request =>
-      import play.api.libs.iteratee.Execution.Implicits.trampoline
+  private def createBadResult(msg: String, statusCode: Int = BAD_REQUEST): RequestHeader => Future[Result] =
+    internalParser.publicCreateBadResult(msg, statusCode)
 
-      internal.BodyParsers.parse.enforceMaxLength(request, maxLength, Accumulator(
-        Sink.fold[ByteString, ByteString](ByteString.empty)((state, bs) => state ++ bs)
-      ) mapFuture { bytes =>
-          try {
-            Future.successful(Right(parser(request, bytes)))
-          } catch {
-            case NonFatal(e) =>
-              logger.debug(errorMessage, e)
-              errorHandler(request, bytes, e).map(Left(_))
+  def extract[A](implicit format: Formats, manifest: Manifest[A]): BodyParser[A] =
+    parseWith(j => j.extractOpt[A])
+
+  private def parseWith[A](f: JValue => Option[A]): BodyParser[A] =
+    BodyParser("json reader") { request =>
+      import internal.Execution.Implicits.trampoline
+      json(request).mapFuture {
+        case Left(simpleResult) =>
+          Future.successful(Left(simpleResult))
+        case Right(jsValue) =>
+          f(jsValue) match {
+            case Some(a) => Future.successful(Right(a))
+            case None =>
+              val msg = s"Json validation error"
+              createBadResult(msg)(request) map Left.apply
           }
-        })
+      }
     }
 
-  private[this] val defaultParser: (RequestHeader, ByteString) => Json4sJValue = {
-    (request, bytes) =>
-      parse(bytes.iterator.asInputStream)
-  }
+  protected def tolerantBodyParser[A](
+      name: String,
+      maxLength: Long,
+      errorMessage: String
+    )(parser: (RequestHeader, ByteString) => A
+    ): BodyParser[A] = internalParser.publicTolerantBodyParser[A](name, maxLength, errorMessage)(parser)
 
-  def tolerantJson(maxLength: Int): BodyParser[Json4sJValue] =
-    defaultTolerantBodyParser[Json4sJValue]("json", maxLength)(defaultParser)
+  def DefaultMaxTextLength: Int = internalParser.DefaultMaxTextLength
 
-  def tolerantJsonWithErrorHandler(maxLength: Int, errorHandler: ParseErrorHandler): BodyParser[Json4sJValue] =
-    tolerantBodyParser[Json4sJValue]("json", maxLength, defaultParseErrorMessage)(defaultParser)(errorHandler)
+  def tolerantJson(maxLength: Int): BodyParser[JValue] =
+    tolerantBodyParser[JValue]("json", maxLength, "Invalid Json") { (request, bytes) =>
+      // Encoding notes: RFC 4627 requires that JSON be encoded in Unicode, and states that whether that's
+      // UTF-8, UTF-16 or UTF-32 can be auto detected by reading the first two bytes. So we ignore the declared
+      // charset and don't decode, we passing the byte array as is because Jackson supports auto detection.
+      methods.parse(bytes.iterator.asInputStream)
+    }
 
-  /**
-   * Parse the body as Json without checking the Content-Type.
-   */
-  def tolerantJson: BodyParser[Json4sJValue] = tolerantJson(DEFAULT_MAX_TEXT_LENGTH)
+  def tolerantJson: BodyParser[JValue] = tolerantJson(DefaultMaxTextLength)
 
-  def jsonWithErrorHandler(maxLength: Int)(errorHandler: ParseErrorHandler): BodyParser[Json4sJValue] = BodyParsers.parse.when(
+  def json(maxLength: Int): BodyParser[JValue] = when(
     _.contentType.exists(m => m.equalsIgnoreCase("text/json") || m.equalsIgnoreCase("application/json")),
-    tolerantJsonWithErrorHandler(maxLength, errorHandler),
-    internal.BodyParsers.parse.createBadResult("Expecting text/json or application/json body")
+    tolerantJson(maxLength),
+    createBadResult("Expecting text/json or application/json body", UNSUPPORTED_MEDIA_TYPE)
   )
 
-  def json(maxLength: Int): BodyParser[Json4sJValue] =
-    jsonWithErrorHandler(maxLength)(defaultParseErrorHandler)
+  def json: BodyParser[JValue] = json(DefaultMaxTextLength)
 
-  def json: BodyParser[Json4sJValue] = json(BodyParsers.parse.DefaultMaxTextLength)
 }

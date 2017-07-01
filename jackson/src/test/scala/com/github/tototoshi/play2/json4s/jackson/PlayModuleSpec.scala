@@ -16,83 +16,71 @@
 
 package com.github.tototoshi.play2.json4s.jackson
 
+import javax.inject.{Inject, Singleton}
+
 import com.github.tototoshi.play2.json4s.test.jackson.Helpers._
+import com.github.tototoshi.play2.json4s.testkit.WithActorSystem
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
-import org.scalatest.{ FunSpec, ShouldMatchers }
-import play.api._
+import org.scalatest.{FunSpec, Matchers}
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
-import play.core.server.Server
 
 case class Person(id: Long, name: String, age: Int)
 
-class TestApplication(json4s: Json4s) extends Controller {
+@Singleton
+class TestController @Inject()(cc: ControllerComponents, json4s: Json4s) extends AbstractController(cc) {
 
   implicit val formats = DefaultFormats
+  import json4s.implicits._
 
-  import json4s._
-
-  def get = Action { implicit request =>
+  def get = Action {
     Ok(Extraction.decompose(Person(1, "ぱみゅぱみゅ", 20)))
   }
 
-  def post = Action(json) { implicit request =>
+  def post = Action(json4s.json) { implicit request: Request[JValue] =>
     Ok(request.body.extract[Person].name)
+  }
+
+  def postExtract = Action(json4s.extract[Person]) { implicit request: Request[Person] =>
+    Ok(request.body.name)
   }
 
 }
 
-class PlayModuleSpec extends FunSpec with ShouldMatchers {
-
-  val configuration = Configuration.empty
-
-  val json4s = new Json4s(configuration)
-  import json4s._
+class PlayModuleSpec extends FunSpec with Matchers with WithActorSystem {
 
   describe("Json4sPlayModule") {
 
     describe("With controllers") {
 
       it("allow you to use json4s-jackson value as response") {
-        val app = new TestApplication(json4s)
-        val res = app.get(FakeRequest("GET", ""))
-        contentType(res) should be(Some("application/json"))
-        contentAsJson4s(res) should be(JObject(List(("id", JInt(1)), ("name", JString("ぱみゅぱみゅ")), ("age", JInt(20)))))
+        val app = new GuiceApplicationBuilder()
+          .bindings(new Json4sModule)
+          .build()
+        running(app) {
+          val controller = app.injector.instanceOf[TestController]
+          val res = call(controller.get, FakeRequest("GET", ""))
+          contentType(res) should be(Some("application/json"))
+          contentAsJson4s(res) should be(
+            JObject(List(("id", JInt(1)), ("name", JString("ぱみゅぱみゅ")), ("age", JInt(20))))
+          )
+        }
       }
 
       it("accept json4s-jackson request") {
-        val app = new TestApplication(json4s)
-        val res = app.post(FakeRequest().withJson4sBody(parse("""{"id":1,"name":"ぱみゅぱみゅ","age":20}""")))
-        contentAsString(res) should be("ぱみゅぱみゅ")
-      }
-
-    }
-
-    describe("With WS") {
-
-      it("should enable you to use json4s objects as request body") {
-        import scala.concurrent._
-        import scala.concurrent.duration._
-        import scala.language.postfixOps
-
-        implicit val formats = DefaultFormats
-
-        Server.withRouter() {
-          case _ => Action(json4s.json) { request =>
-            val person = request.body.extract[Person]
-            play.api.mvc.Results.Ok(Extraction.decompose(person))
-          }
-        } { implicit port =>
-          WsTestClient.withClient { client =>
-            val res = Await.result(
-              client.url("http://localhost:" + port)
-                .post(Extraction.decompose(Person(1, "ぱみゅぱみゅ", 20))),
-              5 seconds
-            )
-            res.body should be("""{"id":1,"name":"ぱみゅぱみゅ","age":20}""")
-          }
+        val request = FakeRequest().withJson4sBody(parse("""{"id":1,"name":"ぱみゅぱみゅ","age":20}"""))
+        val app = new GuiceApplicationBuilder()
+          .bindings(new Json4sModule)
+          .build()
+        running(app) {
+          val controller = app.injector.instanceOf[TestController]
+          val json4s = app.injector.instanceOf[Json4s]
+          import json4s.implicits._
+          contentAsString(call(controller.post, request)) should be("ぱみゅぱみゅ")
+          contentAsString(call(controller.postExtract, request)) should be("ぱみゅぱみゅ")
         }
       }
 
@@ -101,4 +89,3 @@ class PlayModuleSpec extends FunSpec with ShouldMatchers {
   }
 
 }
-

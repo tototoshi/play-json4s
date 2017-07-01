@@ -17,7 +17,7 @@ package com.github.tototoshi.play2.json4s.test.core
 
 import akka.util.Timeout
 import org.json4s._
-import play.api.mvc.{ Request, Result }
+import play.api.mvc.{Request, Result}
 import play.api.test._
 import play.twirl.api.Content
 
@@ -32,6 +32,7 @@ class Helpers[T](methods: JsonMethods[T]) {
   def contentAsJson4s(of: Content)(implicit timeout: Timeout): JValue = parse(of.body)
 
   implicit class Json4sFakeRequest[A](fakeRequest: FakeRequest[A]) {
+
     def withJson4sBody(jval: JValue): Request[JValue] =
       fakeRequest
         .withHeaders("Content-Type" -> "application/json")
@@ -39,4 +40,3 @@ class Helpers[T](methods: JsonMethods[T]) {
   }
 
 }
-

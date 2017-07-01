@@ -18,13 +18,26 @@ package com.github.tototoshi.play2.json4s.native
 
 import javax.inject.Inject
 
+import akka.stream.Materializer
 import com.github.tototoshi.play2.json4s.core._
 import org.json4s.native.Document
-import play.api.inject.{ Binding, Module }
-import play.api.{ Configuration, Environment }
+import play.api.http.{HttpErrorHandler, ParserConfiguration}
+import play.api.inject.{Binding, Module}
+import play.api.libs.Files.TemporaryFileCreator
+import play.api.{Configuration, Environment}
 
-class Json4s @Inject() (configuration: Configuration)
-  extends Json4sParser[Document](configuration, org.json4s.native.JsonMethods)
+class Json4s @Inject()(
+    config: ParserConfiguration,
+    errorHandler: HttpErrorHandler,
+    materializer: Materializer,
+    temporaryFileCreator: TemporaryFileCreator)
+  extends Json4sParser[Document](
+    org.json4s.native.JsonMethods,
+    config,
+    errorHandler,
+    materializer,
+    temporaryFileCreator
+  )
 
 class Json4sModule extends Module {
   override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] = Seq(
