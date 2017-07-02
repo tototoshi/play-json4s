@@ -50,6 +50,10 @@ abstract class Json4sParser[T](
 
   }
 
+  /**
+   * tolerantBodyParser and createBadResult is protected method,
+   * so Json4sParser class cannot use it directory.
+   */
   private class InternalPlayBodyParser(
       val config: ParserConfiguration,
       val errorHandler: HttpErrorHandler,
