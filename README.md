@@ -59,7 +59,11 @@ import play.api.mvc.{ Controller, Action }
 @Singleton
 class HomeController @Inject() (json4s: Json4s) extends Controller {
 
+  /*
+   * import Writeable[JValue] and ContentTypeOf[JValue]
+   */
   import json4s.implicits._
+
   implicit val formats = DefaultFormats
 
   def get = Action { implicit request =>
