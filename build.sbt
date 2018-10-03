@@ -1,7 +1,7 @@
 val _version = "0.8.0"
-val _json4sVersion = "3.5.2"
-val _playVersion = "2.6.0"
-val _scalatestVersion = "3.0.1"
+val _json4sVersion = "3.6.1"
+val _playVersion = "2.6.19"
+val _scalatestVersion = "3.0.5"
 
 val json4sCore = "org.json4s" %% "json4s-core" % _json4sVersion
 val json4sNative = "org.json4s" %% "json4s-native" % _json4sVersion
@@ -11,7 +11,7 @@ val scalatest = "org.scalatest" %% "scalatest" % _scalatestVersion
 val playApi = "com.typesafe.play" %% "play" % _playVersion
 val playTest = "com.typesafe.play" %% "play-test" % _playVersion
 
-val playDependencies = Seq(playApi % "provided", playTest % "test")
+val playDependencies = Seq(playApi % Provided, playTest % Test)
 
 val publishingSettings = Seq(
   publishMavenStyle := true,
@@ -30,8 +30,8 @@ val nonPublishSettings = Seq(
 val baseSettings = Seq(
   organization := "com.github.tototoshi",
   version := _version,
-  scalaVersion := "2.12.2",
-  crossScalaVersions := Seq("2.11.8", "2.12.2"),
+  scalaVersion := "2.12.7",
+  crossScalaVersions := Seq("2.11.12", "2.12.7"),
   scalacOptions ++= Seq("-feature", "-deprecation"),
   resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases"
 )
@@ -55,7 +55,7 @@ lazy val core = project
     name := "play-json4s-core",
     libraryDependencies ++= playDependencies ++ Seq(
       json4sCore,
-      scalatest % "test"
+      scalatest % Test
     )
   )
   .dependsOn(api)
@@ -67,8 +67,8 @@ lazy val testCore = project
   .settings(
     name := "play-json4s-test-core",
     libraryDependencies ++= Seq(
-      playApi % "provided",
-      playTest % "provided",
+      playApi % Provided,
+      playTest % Provided,
       json4sCore
     )
   )
@@ -81,8 +81,8 @@ lazy val testNative = project
   .settings(
     name := "play-json4s-test-native",
     libraryDependencies ++= Seq(
-      playApi % "provided",
-      playTest % "provided",
+      playApi % Provided,
+      playTest % Provided,
       json4sNative
     )
   )
@@ -95,8 +95,8 @@ lazy val testJackson = project
   .settings(
     name := "play-json4s-test-jackson",
     libraryDependencies ++= Seq(
-      playApi % "provided",
-      playTest % "provided",
+      playApi % Provided,
+      playTest % Provided,
       json4sJackson
     )
   )
@@ -110,10 +110,10 @@ lazy val native = project
     name := "play-json4s-native",
     libraryDependencies ++= playDependencies ++ Seq(
       json4sNative,
-      scalatest % "test"
+      scalatest % Test
     )
   )
-  .dependsOn(core % "test->test;compile->compile", api, testNative % "test")
+  .dependsOn(core % "test->test;compile->compile", api, testNative % Test)
 
 lazy val jackson = project
   .in(file("jackson"))
@@ -123,10 +123,10 @@ lazy val jackson = project
     name := "play-json4s-jackson",
     libraryDependencies ++= playDependencies ++ Seq(
       json4sJackson,
-      scalatest % "test"
+      scalatest % Test
     )
   )
-  .dependsOn(core % "test->test;compile->compile", testJackson % "test")
+  .dependsOn(core % "test->test;compile->compile", testJackson % Test)
 
 lazy val example = project
   .in(file("example"))
