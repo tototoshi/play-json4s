@@ -19,7 +19,7 @@ package com.github.tototoshi.play2.json4s.core
 import akka.stream.Materializer
 import akka.util.ByteString
 import com.github.tototoshi.play2.json4s.{Json4s, Json4sImplicits}
-import org.json4s.{Formats, JValue, JsonMethods, Reader}
+import org.json4s.{Formats, JValue, JsonMethods, MappingException}
 import play.api.http._
 import play.api.libs.Files.TemporaryFileCreator
 import play.api.mvc._
@@ -34,8 +34,8 @@ abstract class Json4sParser[T](
     val temporaryFileCreator: TemporaryFileCreator)
   extends Json4s {
 
-  import methods._
   import BodyParsers.utils._
+  import methods._
   import play.api.http.Status._
 
   val implicits: Json4sImplicits = new Json4sImplicits {
@@ -80,20 +80,17 @@ abstract class Json4sParser[T](
     internalParser.publicCreateBadResult(msg, statusCode)
 
   def extract[A](implicit format: Formats, manifest: Manifest[A]): BodyParser[A] =
-    parseWith(j => j.extractOpt[A])
+    parseWith(j => j.extract[A])
 
-  private def parseWith[A](f: JValue => Option[A]): BodyParser[A] =
+  private def parseWith[A](f: JValue => A): BodyParser[A] =
     BodyParser("json reader") { request =>
       import internal.Execution.Implicits.trampoline
       json(request).mapFuture {
         case Left(simpleResult) =>
           Future.successful(Left(simpleResult))
         case Right(jsValue) =>
-          f(jsValue) match {
-            case Some(a) => Future.successful(Right(a))
-            case None =>
-              val msg = s"Json validation error"
-              createBadResult(msg)(request) map Left.apply
+          try { Future.successful(Right(f(jsValue))) } catch {
+            case ex: MappingException => createBadResult(s"Json validation error: ${ex.msg}")(request) map Left.apply
           }
       }
     }
