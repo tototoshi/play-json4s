@@ -1,4 +1,4 @@
-val _version = "0.8.0"
+val _version = "0.8.1"
 val _json4sVersion = "3.6.1"
 val _playVersion = "2.6.19"
 val _scalatestVersion = "3.0.5"
@@ -15,7 +15,6 @@ val playDependencies = Seq(playApi % Provided, playTest % Test)
 
 val publishingSettings = Seq(
   publishMavenStyle := true,
-  publishTo := _publishTo(version.value),
   publishArtifact in Test := false,
   pomExtra := _pomExtra
 )
@@ -33,7 +32,8 @@ val baseSettings = Seq(
   scalaVersion := "2.12.7",
   crossScalaVersions := Seq("2.11.12", "2.12.7"),
   scalacOptions ++= Seq("-feature", "-deprecation"),
-  resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases"
+  resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases",
+  publishTo := _publishTo(version.value),
 )
 
 lazy val api = project
@@ -151,11 +151,11 @@ def _publishTo(v: String) = {
 }
 
 val _pomExtra =
-  <url>http://github.com/tototoshi/play-json4s</url>
+  <url>https://github.com/tototoshi/play-json4s</url>
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.html</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
@@ -167,6 +167,6 @@ val _pomExtra =
     <developer>
       <id>tototoshi</id>
       <name>Toshiyuki Takahashi</name>
-      <url>http://tototoshi.github.io</url>
+      <url>https://tototoshi.github.io</url>
     </developer>
   </developers>

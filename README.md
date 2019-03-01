@@ -146,6 +146,10 @@ class PlayModuleSpec extends FunSpec with Matchers with WithActorSystem {
 
 ## ChangeLog
 
+### 0.8.1
+
+ - Improved error message when validation failed
+
 ### 0.8.0
 
  - Support Play 2.6.0
