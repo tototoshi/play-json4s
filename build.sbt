@@ -133,6 +133,11 @@ lazy val example = project
   .enablePlugins(PlayScala)
   .settings(baseSettings)
   .settings(nonPublishSettings)
+  .settings(
+    libraryDependencies ++= Seq(
+      guice
+    )
+  )
   .dependsOn(jackson)
 
 lazy val playJson4s = project
