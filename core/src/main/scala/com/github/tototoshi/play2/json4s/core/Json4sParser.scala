@@ -102,9 +102,9 @@ abstract class Json4sParser[T](
     )(parser: (RequestHeader, ByteString) => A
     ): BodyParser[A] = internalParser.publicTolerantBodyParser[A](name, maxLength, errorMessage)(parser)
 
-  def DefaultMaxTextLength: Int = internalParser.DefaultMaxTextLength
+  def DefaultMaxTextLength: Long = internalParser.DefaultMaxTextLength
 
-  def tolerantJson(maxLength: Int): BodyParser[JValue] =
+  def tolerantJson(maxLength: Long): BodyParser[JValue] =
     tolerantBodyParser[JValue]("json", maxLength, "Invalid Json") { (request, bytes) =>
       // Encoding notes: RFC 4627 requires that JSON be encoded in Unicode, and states that whether that's
       // UTF-8, UTF-16 or UTF-32 can be auto detected by reading the first two bytes. So we ignore the declared
@@ -114,7 +114,7 @@ abstract class Json4sParser[T](
 
   def tolerantJson: BodyParser[JValue] = tolerantJson(DefaultMaxTextLength)
 
-  def json(maxLength: Int): BodyParser[JValue] = when(
+  def json(maxLength: Long): BodyParser[JValue] = when(
     _.contentType.exists(m => m.equalsIgnoreCase("text/json") || m.equalsIgnoreCase("application/json")),
     tolerantJson(maxLength),
     createBadResult("Expecting text/json or application/json body", UNSUPPORTED_MEDIA_TYPE)

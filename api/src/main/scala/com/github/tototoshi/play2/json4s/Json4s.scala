@@ -8,11 +8,11 @@ trait Json4s {
 
   val implicits: Json4sImplicits
 
-  def tolerantJson(maxLength: Int): BodyParser[JValue]
+  def tolerantJson(maxLength: Long): BodyParser[JValue]
 
   def tolerantJson: BodyParser[JValue]
 
-  def json(maxLength: Int): BodyParser[JValue]
+  def json(maxLength: Long): BodyParser[JValue]
 
   def json: BodyParser[JValue]
 
