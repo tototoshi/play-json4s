@@ -1,4 +1,4 @@
-val _version = "0.8.1"
+val _version = "0.9.0-SNAPSHOT"
 val _json4sVersion = "3.6.1"
 val _playVersion = "2.6.19"
 val _scalatestVersion = "3.0.5"
