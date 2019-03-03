@@ -15,23 +15,23 @@ Current version is
   - 0.5.0 (for Play 2.5, Json4s 3.3.0)
   - 0.6.0 (for Play 2.5, Json4s 3.4.2)
   - 0.7.0 (for Play 2.5, Json4s 3.5.1)
-  - 0.8.0 (for Play 2.6, Json4s 3.5.2)
+  - 0.8.1 (for Play 2.6, Json4s 3.5.2)
 
 Add the following lines in your build.sbt.
 
 To use json4s-native
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.tototoshi" %% "play-json4s-native" % "0.8.0",
-  "com.github.tototoshi" %% "play-json4s-test-native" % "0.8.0" % "test"
+  "com.github.tototoshi" %% "play-json4s-native" % "0.8.1",
+  "com.github.tototoshi" %% "play-json4s-test-native" % "0.8.1" % "test"
 )
 ```
 
 To use json4s-jackson
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.tototoshi" %% "play-json4s-jackson" % "0.8.0",
-  "com.github.tototoshi" %% "play-json4s-test-jackson" % "0.8.0" % "test"
+  "com.github.tototoshi" %% "play-json4s-jackson" % "0.8.1",
+  "com.github.tototoshi" %% "play-json4s-test-jackson" % "0.8.1" % "test"
 )
 ```
 
