@@ -32,7 +32,7 @@ val baseSettings = Seq(
   scalaVersion := "2.12.10",
   crossScalaVersions := Seq("2.11.12", scalaVersion.value, "2.13.1"),
   scalacOptions ++= Seq("-feature", "-deprecation"),
-  resolvers += "typesafe" at "http://repo.typesafe.com/typesafe/releases",
+  resolvers += "typesafe" at "https://repo.typesafe.com/typesafe/releases",
   publishTo := _publishTo(version.value),
 )
 
