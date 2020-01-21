@@ -16,13 +16,13 @@
 
 package com.github.tototoshi.play2.json4s.jackson
 
-import javax.inject.{Inject, Singleton}
-
 import com.github.tototoshi.play2.json4s.test.jackson.Helpers._
 import com.github.tototoshi.play2.json4s.testkit.WithActorSystem
+import javax.inject.{Inject, Singleton}
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc._
 import play.api.test.Helpers._
@@ -50,7 +50,7 @@ class TestController @Inject()(cc: ControllerComponents, json4s: Json4s) extends
 
 }
 
-class PlayModuleSpec extends FunSpec with Matchers with WithActorSystem {
+class PlayModuleSpec extends AnyFunSpec with Matchers with WithActorSystem {
 
   describe("Json4sPlayModule") {
 
