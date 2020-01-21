@@ -2,3 +2,4 @@ target/
 logs/
 .DS_Store
 *.class
+.idea/
