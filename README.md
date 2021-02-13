@@ -1,6 +1,6 @@
 # play-json4s
 
-[![Build Status](https://travis-ci.org/tototoshi/play-json4s.png)](https://travis-ci.org/tototoshi/play-json4s)
+![Scala CI](https://github.com/tototoshi/play-json4s/workflows/Scala%20CI/badge.svg)
 
 This module allows you to use json4s in your play20 application.
 
