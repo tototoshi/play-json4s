@@ -1,5 +1,5 @@
 val _version = "0.10.0"
-val _json4sVersion = "3.6.7"
+val _json4sVersion = "3.6.10"
 val _playVersion = play.core.PlayVersion.current
 val _scalatestVersion = "3.1.1"
 
