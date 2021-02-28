@@ -19,22 +19,23 @@ Current version is
   - 0.8.1  (for Play 2.6, Json4s 3.6.1)
   - 0.9.1  (for Play 2.7, Json4s 3.6.7)
   - 0.10.0 (for Play 2.8, Json4s 3.6.7)
+  - 0.10.1 (for Play 2.8, Json4s 3.6.10)
 
 Add the following lines in your build.sbt.
 
 To use json4s-native
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.tototoshi" %% "play-json4s-native" % "0.10.0",
-  "com.github.tototoshi" %% "play-json4s-test-native" % "0.10.0" % "test"
+  "com.github.tototoshi" %% "play-json4s-native" % "0.10.1",
+  "com.github.tototoshi" %% "play-json4s-test-native" % "0.10.1" % "test"
 )
 ```
 
 To use json4s-jackson
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.tototoshi" %% "play-json4s-jackson" % "0.10.0",
-  "com.github.tototoshi" %% "play-json4s-test-jackson" % "0.10.0" % "test"
+  "com.github.tototoshi" %% "play-json4s-jackson" % "0.10.1",
+  "com.github.tototoshi" %% "play-json4s-test-jackson" % "0.10.1" % "test"
 )
 ```
 
@@ -147,6 +148,10 @@ class PlayModuleSpec extends FunSpec with Matchers with WithActorSystem {
 }
 ```
 ## ChangeLog
+
+### 0.10.1
+
+ - Json4s 3.6.10
 
 ### 0.10.0
 
