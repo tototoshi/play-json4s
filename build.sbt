@@ -15,7 +15,7 @@ val playDependencies = Seq(playApi % Provided, playTest % Test)
 
 val publishingSettings = Seq(
   publishMavenStyle := true,
-  publishArtifact in Test := false,
+  Test / publishArtifact := false,
   pomExtra := _pomExtra
 )
 
@@ -23,7 +23,7 @@ val nonPublishSettings = Seq(
   publishArtifact := false,
   publish := {},
   publishLocal := {},
-  parallelExecution in Test := false
+  Test / parallelExecution := false
 )
 
 val baseSettings = Seq(
