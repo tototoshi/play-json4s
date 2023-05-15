@@ -1,7 +1,7 @@
 val _version = "0.10.2-SNAPSHOT"
 val _json4sVersion = "3.6.12"
 val _playVersion = play.core.PlayVersion.current
-val _scalatestVersion = "3.2.15"
+val _scalatestVersion = "3.2.16"
 
 val json4sCore = "org.json4s" %% "json4s-core" % _json4sVersion
 val json4sNative = "org.json4s" %% "json4s-native" % _json4sVersion
