@@ -1,7 +1,7 @@
 val _version = "0.10.2-SNAPSHOT"
 val _json4sVersion = "3.6.12"
 val _playVersion = play.core.PlayVersion.current
-val _scalatestVersion = "3.2.15"
+val _scalatestVersion = "3.2.17"
 
 val json4sCore = "org.json4s" %% "json4s-core" % _json4sVersion
 val json4sNative = "org.json4s" %% "json4s-native" % _json4sVersion
@@ -29,7 +29,7 @@ val nonPublishSettings = Seq(
 val baseSettings = Seq(
   organization := "com.github.tototoshi",
   version := _version,
-  scalaVersion := "2.12.17",
+  scalaVersion := "2.12.19",
   crossScalaVersions := Seq(scalaVersion.value, "2.13.14"),
   scalacOptions ++= Seq("-feature", "-deprecation"),
   resolvers += "typesafe" at "https://repo.typesafe.com/typesafe/releases",
